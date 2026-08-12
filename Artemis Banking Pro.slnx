@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/Source/" />
+  <Folder Name="/Source/Core/">
+    <Project Path="ArtemisBankingPro.Core.Application/ArtemisBankingPro.Core.Application.csproj" />
+    <Project Path="ArtemisBankingPro.Core.Domain/ArtemisBankingPro.Core.Domain.csproj" />
+  </Folder>
+  <Folder Name="/Source/Infrastructure/">
+    <Project Path="ArtemisBankingPro.Persistance/ArtemisBankingPro.Persistance.csproj" />
+  </Folder>
+  <Folder Name="/Source/Presentation/">
+    <Project Path="Artemis Banking Pro/Artemis Banking Pro.csproj" />
+  </Folder>
+</Solution>
