@@ -28,6 +28,11 @@ public class TransaccionConfiguration : IEntityTypeConfiguration<Transaccion>
             .HasForeignKey(x => x.PrestamoId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        builder.HasOne(x => x.RealizadoPor)
+            .WithMany()
+            .HasForeignKey(x => x.RealizadoPorUserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         // Índice para acelerar el listado de transacciones por cuenta ordenado por fecha (lo vas a usar mucho)
         builder.HasIndex(x => new { x.CuentaAhorroId, x.Fecha });
     }

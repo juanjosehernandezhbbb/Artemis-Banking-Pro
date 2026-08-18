@@ -361,3 +361,8 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Documentación del proyecto (no se sube al repositorio)
+DOCUMENTACION_ABP.md
+Evaluación Proyecto Final_ Artemis Banking Pro (ABP).txt
+Proyecto final_ Artemis Banking Pro (ABP).txt

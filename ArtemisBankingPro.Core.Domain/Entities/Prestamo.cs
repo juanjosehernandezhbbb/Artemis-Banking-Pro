@@ -15,6 +15,10 @@ public class Prestamo : BaseEntity, IAuditableEntity
     public EstadoPrestamo Estado { get; set; }
     public DateTime FechaCreacion { get; set; }
 
+    public string? AdministradorId { get; set; }
+    public ApplicationUser? Administrador { get; set; }
+
+
     public ApplicationUser Cliente { get; set; } = default!;
     public ICollection<CuotaAmortizacion> Cuotas { get; set; } = new List<CuotaAmortizacion>();
 }

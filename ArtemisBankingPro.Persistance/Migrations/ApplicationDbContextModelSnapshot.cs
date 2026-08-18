@@ -17,7 +17,7 @@ namespace ArtemisBankingPro.Persistance.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.0")
+                .HasAnnotation("ProductVersion", "9.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -251,6 +251,9 @@ namespace ArtemisBankingPro.Persistance.Migrations
                     b.Property<int>("EstadoPago")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("FechaPago")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime>("FechaVencimiento")
                         .HasColumnType("datetime2");
 
@@ -287,6 +290,9 @@ namespace ArtemisBankingPro.Persistance.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("AdministradorId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<decimal>("CapitalAprobado")
                         .HasColumnType("decimal(18,2)");
 
@@ -313,6 +319,8 @@ namespace ArtemisBankingPro.Persistance.Migrations
                         .HasColumnType("decimal(5,2)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AdministradorId");
 
                     b.HasIndex("ClienteId");
 
@@ -409,6 +417,9 @@ namespace ArtemisBankingPro.Persistance.Migrations
                     b.Property<int?>("PrestamoId")
                         .HasColumnType("int");
 
+                    b.Property<string>("RealizadoPorUserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<int?>("TarjetaCreditoId")
                         .HasColumnType("int");
 
@@ -421,6 +432,8 @@ namespace ArtemisBankingPro.Persistance.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("PrestamoId");
+
+                    b.HasIndex("RealizadoPorUserId");
 
                     b.HasIndex("TarjetaCreditoId");
 
@@ -615,11 +628,17 @@ namespace ArtemisBankingPro.Persistance.Migrations
 
             modelBuilder.Entity("ArtemisBankingPro.Core.Domain.Entities.Prestamo", b =>
                 {
+                    b.HasOne("ArtemisBankingPro.Core.Domain.Entities.ApplicationUser", "Administrador")
+                        .WithMany()
+                        .HasForeignKey("AdministradorId");
+
                     b.HasOne("ArtemisBankingPro.Core.Domain.Entities.ApplicationUser", "Cliente")
                         .WithMany("Prestamos")
                         .HasForeignKey("ClienteId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("Administrador");
 
                     b.Navigation("Cliente");
                 });
@@ -647,6 +666,11 @@ namespace ArtemisBankingPro.Persistance.Migrations
                         .HasForeignKey("PrestamoId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("ArtemisBankingPro.Core.Domain.Entities.ApplicationUser", "RealizadoPor")
+                        .WithMany()
+                        .HasForeignKey("RealizadoPorUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("ArtemisBankingPro.Core.Domain.Entities.TarjetaCredito", "TarjetaCredito")
                         .WithMany("Consumos")
                         .HasForeignKey("TarjetaCreditoId")
@@ -655,6 +679,8 @@ namespace ArtemisBankingPro.Persistance.Migrations
                     b.Navigation("CuentaAhorro");
 
                     b.Navigation("Prestamo");
+
+                    b.Navigation("RealizadoPor");
 
                     b.Navigation("TarjetaCredito");
                 });

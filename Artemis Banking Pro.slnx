@@ -9,5 +9,7 @@
   </Folder>
   <Folder Name="/Source/Presentation/">
     <Project Path="Artemis Banking Pro/Artemis Banking Pro.csproj" />
+    <Project Path="ArtemisBankingPro.API/ArtemisBankingPro.API.csproj" Id="e735cae0-70b2-4751-aac4-12817a1d2901" />
   </Folder>
+  <Project Path="ArtemisBankingPro.Tests/ArtemisBankingPro.Tests.csproj" />
 </Solution>
