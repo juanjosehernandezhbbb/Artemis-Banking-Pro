@@ -1,0 +1,52 @@
+﻿@model ArtemisBankingPro.WebApp.ViewModels.ExpressTransactionViewModel
+@{
+    ViewData["Title"] = "Transacción Express";
+}
+
+<div class="container py-4" style="max-width: 600px;">
+    <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
+        <div class="text-center mb-4">
+            <div class="bg-warning bg-opacity-10 text-warning rounded-circle d-inline-flex p-3 mb-2">
+                <i class="bi bi-lightning-charge fs-1"></i>
+            </div>
+            <h3 class="fw-bold text-dark">Transacción Express</h3>
+            <p class="text-muted">Envíe fondos de forma inmediata a cualquier cuenta de ahorro activa.</p>
+        </div>
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div asp-validation-summary="All" class="alert alert-danger rounded-3 shadow-sm border-0 small fw-semibold"></div>
+        }
+
+        <form asp-action="ExpressTransaction" method="post">
+            <div class="mb-3">
+                <label asp-for="SourceAccountId" class="form-label fw-bold text-secondary small text-uppercase">Cuenta de Origen</label>
+                <select asp-for="SourceAccountId" asp-items="Model.ActiveAccounts" class="form-select bg-light form-select-lg"></select>
+                <span asp-validation-for="SourceAccountId" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="TargetAccountNumber" class="form-label fw-bold text-secondary small text-uppercase">Número de Cuenta Destino (9 dígitos)</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-hash"></i></span>
+                    <input asp-for="TargetAccountNumber" class="form-control border-start-0 bg-light form-control-lg font-monospace fw-bold" maxlength="9" placeholder="Ej. 100000001" />
+                </div>
+                <span asp-validation-for="TargetAccountNumber" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="Amount" class="form-label fw-bold text-secondary small text-uppercase">Monto a Transferir</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0 fw-bold">RD$</span>
+                    <input asp-for="Amount" type="number" step="0.01" class="form-control border-start-0 bg-light form-control-lg fw-bold text-success" placeholder="0.00" />
+                </div>
+                <span asp-validation-for="Amount" class="text-danger small"></span>
+            </div>
+
+            <div class="d-flex justify-content-between mt-4">
+                <a asp-action="Index" class="btn btn-light px-4 rounded-pill fw-bold text-secondary border">Cancelar</a>
+                <button type="submit" class="btn btn-primary px-5 rounded-pill fw-bold shadow-sm">Continuar</button>
+            </div>
+        </form>
+    </div>
+</div>

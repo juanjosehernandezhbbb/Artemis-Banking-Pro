@@ -1,0 +1,50 @@
+﻿@model ArtemisBankingPro.WebApp.ViewModels.PayCreditCardViewModel
+@{
+    ViewData["Title"] = "Pago a Tarjeta de Crédito";
+}
+
+<div class="container py-4" style="max-width: 600px;">
+    <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
+        <div class="text-center mb-4">
+            <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex p-3 mb-2">
+                <i class="bi bi-credit-card fs-1"></i>
+            </div>
+            <h3 class="fw-bold text-dark">Pago a Tarjeta de Crédito</h3>
+            <p class="text-muted">Abonar a sus tarjetas activas utilizando fondos de sus cuentas de ahorro.</p>
+        </div>
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div asp-validation-summary="All" class="alert alert-danger rounded-3 shadow-sm border-0 small fw-semibold"></div>
+        }
+
+        <form asp-action="PayCreditCard" method="post">
+            <div class="mb-3">
+                <label asp-for="CreditCardId" class="form-label fw-bold text-secondary small text-uppercase">Tarjeta de Crédito Destino</label>
+                <select asp-for="CreditCardId" asp-items="Model.ActiveCards" class="form-select bg-light form-select-lg"></select>
+                <span asp-validation-for="CreditCardId" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="SourceAccountId" class="form-label fw-bold text-secondary small text-uppercase">Cuenta de Origen</label>
+                <select asp-for="SourceAccountId" asp-items="Model.ActiveAccounts" class="form-select bg-light form-select-lg"></select>
+                <span asp-validation-for="SourceAccountId" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="Amount" class="form-label fw-bold text-secondary small text-uppercase">Monto a Pagar</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0 fw-bold">RD$</span>
+                    <input asp-for="Amount" type="number" step="0.01" class="form-control border-start-0 bg-light form-control-lg fw-bold text-success" placeholder="0.00" />
+                </div>
+                <span asp-validation-for="Amount" class="text-danger small"></span>
+                <small class="text-muted d-mt-1">Si el monto supera la deuda actual, el sistema aplicará únicamente el valor exacto adeudado.</small>
+            </div>
+
+            <div class="d-flex justify-content-between mt-4">
+                <a asp-action="Index" class="btn btn-light px-4 rounded-pill fw-bold text-secondary border">Cancelar</a>
+                <button type="submit" class="btn btn-primary px-5 rounded-pill fw-bold shadow-sm">Realizar Pago</button>
+            </div>
+        </form>
+    </div>
+</div>

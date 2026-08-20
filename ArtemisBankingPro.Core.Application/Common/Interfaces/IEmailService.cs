@@ -15,5 +15,11 @@ namespace ArtemisBankingPro.Core.Application.Common.Interfaces
         Task SendCardLimitChangeEmailAsync(string toEmail, string clientName, string lastFourDigits, decimal newLimit);
         Task SendCardConsumptionEmailAsync(string toEmail, string clientName, decimal amount, string lastFourDigits, string commerceName, DateTime transactionDate);
         Task SendPaymentReceivedEmailAsync(string toEmail, string commerceName, decimal amount, string lastFourDigits, DateTime transactionDate);
+
+        Task SendEmailAsync(string toEmail, string subject, string body);
+
+        Task SendCashAdvanceEmailAsync(string toEmail, string clientName, decimal amount, decimal interest, decimal totalCharged, string accountLastFour, DateTime transactionDate);
+
+        Task SendTransferBetweenAccountsEmailAsync(string toEmail, string clientName, decimal amount, string originLastFour, string targetLastFour, DateTime transactionDate);
     }
 }

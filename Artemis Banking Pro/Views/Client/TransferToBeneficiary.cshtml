@@ -1,0 +1,64 @@
+﻿@model ArtemisBankingPro.WebApp.ViewModels.TransferToBeneficiaryViewModel
+@{
+    ViewData["Title"] = "Transacción a Beneficiarios";
+}
+
+<div class="container py-4" style="max-width: 600px;">
+    <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
+        <div class="text-center mb-4">
+            <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex p-3 mb-2">
+                <i class="bi bi-people fs-1"></i>
+            </div>
+            <h3 class="fw-bold text-dark">Transferencia a Beneficiarios</h3>
+            <p class="text-muted">Envíe fondos de manera rápida a cuentas registradas en su directorio.</p>
+        </div>
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div asp-validation-summary="All" class="alert alert-danger rounded-3 shadow-sm border-0 small fw-semibold"></div>
+        }
+
+        @if (!Model.HasBeneficiaries)
+        {
+            <div class="alert alert-warning text-center rounded-3 p-4">
+                <h5 class="fw-bold">No tiene beneficiarios registrados.</h5>
+                <p class="mb-3 small text-muted">Debe registrar un beneficiario en su sección correspondiente antes de realizar transferencias.</p>
+                <a asp-action="Index" class="btn btn-outline-secondary btn-sm rounded-pill fw-bold">Volver al Home</a>
+            </div>
+        }
+        else
+        {
+            <form asp-action="TransferToBeneficiary" method="post">
+                <div class="mb-3">
+                    <label asp-for="BeneficiaryId" class="form-label fw-bold text-secondary small text-uppercase">Beneficiario Destino</label>
+                    <select asp-for="BeneficiaryId" asp-items="Model.Beneficiaries" class="form-select bg-light form-select-lg">
+                        <option value="">-- Seleccione un beneficiario --</option>
+                    </select>
+                    <span asp-validation-for="BeneficiaryId" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="SourceAccountId" class="form-label fw-bold text-secondary small text-uppercase">Cuenta de Origen</label>
+                    <select asp-for="SourceAccountId" asp-items="Model.ActiveAccounts" class="form-select bg-light form-select-lg">
+                        <option value="">-- Seleccione su cuenta --</option>
+                    </select>
+                    <span asp-validation-for="SourceAccountId" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="Amount" class="form-label fw-bold text-secondary small text-uppercase">Monto a Transferir</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0 fw-bold">RD$</span>
+                        <input asp-for="Amount" type="number" step="0.01" class="form-control border-start-0 bg-light form-control-lg fw-bold text-primary" placeholder="0.00" />
+                    </div>
+                    <span asp-validation-for="Amount" class="text-danger small"></span>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <a asp-action="Index" class="btn btn-light px-4 rounded-pill fw-bold text-secondary border">Cancelar</a>
+                    <button type="submit" class="btn btn-primary px-5 rounded-pill fw-bold shadow-sm">Continuar</button>
+                </div>
+            </form>
+        }
+    </div>
+</div>

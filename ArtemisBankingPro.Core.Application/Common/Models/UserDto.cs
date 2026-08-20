@@ -8,5 +8,6 @@
         string LastName,
         string Email,
         string Role,
-        bool IsActive);
+        bool IsActive,
+        bool EmailConfirmed);
 }

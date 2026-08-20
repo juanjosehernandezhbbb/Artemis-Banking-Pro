@@ -15,7 +15,7 @@ namespace ArtemisBankingPro.Core.Application.Users.UpdateUser
     {
         private readonly IIdentityService _identityService;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IDateTimeProvider _dateTimeProvider; 
+        private readonly IDateTimeProvider _dateTimeProvider;
 
         public UpdateUserCommandHandler(IIdentityService identityService, IUnitOfWork unitOfWork, IDateTimeProvider dateTimeProvider)
         {
@@ -59,25 +59,38 @@ namespace ArtemisBankingPro.Core.Application.Users.UpdateUser
                 var cuentas = await cuentaRepository.FindAsync(c => c.ClienteId == request.Id && c.TipoCuenta == TipoCuenta.Principal);
                 var cuentaPrincipal = cuentas.FirstOrDefault();
 
-                if (cuentaPrincipal != null)
+                // Si el cliente no tiene cuenta principal, se la creamos automáticamente para poder abonarle
+                if (cuentaPrincipal == null)
                 {
-                    cuentaPrincipal.Balance += request.AdditionalAmount;
-                    cuentaRepository.Update(cuentaPrincipal); var transaccion = new Transaccion
+                    cuentaPrincipal = new CuentaAhorro
                     {
-                        CuentaAhorroId = cuentaPrincipal.Id,
-                        Tipo = TipoTransaccion.Credito,
-                        TipoOperacion = TipoOperacion.MontoAdicionalAdmin,
-                        Monto = request.AdditionalAmount,
-                        Origen = "AJUSTE ADMINISTRATIVO",
-                        Destino = cuentaPrincipal.NumeroCuenta,
-                        Estado = EstadoTransaccion.Aprobada,
-                        Fecha = _dateTimeProvider.UtcNow,
-                        RealizadoPorUserId = request.PerformedByUserId
+                        ClienteId = request.Id,
+                        NumeroCuenta = new Random().Next(100000000, 999999999).ToString(), // Generador de 9 dígitos temporal
+                        Balance = 0m,
+                        TipoCuenta = TipoCuenta.Principal,
+                        Estado = EstadoCuenta.Activa,
+                        FechaCreacion = _dateTimeProvider.UtcNow
                     };
-
-                    await transaccionRepository.AddAsync(transaccion);
-
+                    await cuentaRepository.AddAsync(cuentaPrincipal);
                 }
+
+                cuentaPrincipal.Balance += request.AdditionalAmount;
+                cuentaRepository.Update(cuentaPrincipal);
+
+                var transaccion = new Transaccion
+                {
+                    CuentaAhorroId = cuentaPrincipal.Id,
+                    Tipo = TipoTransaccion.Credito,
+                    TipoOperacion = TipoOperacion.MontoAdicionalAdmin,
+                    Monto = request.AdditionalAmount,
+                    Origen = "AJUSTE ADMINISTRATIVO",
+                    Destino = cuentaPrincipal.NumeroCuenta,
+                    Estado = EstadoTransaccion.Aprobada,
+                    Fecha = _dateTimeProvider.UtcNow,
+                    RealizadoPorUserId = request.PerformedByUserId
+                };
+
+                await transaccionRepository.AddAsync(transaccion);
             }
         }
     }

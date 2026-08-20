@@ -1,0 +1,78 @@
+﻿@model Artemis_Banking_Pro.Models.ViewModels.LoginViewModel
+
+@{
+    ViewData["Title"] = "Iniciar sesión";
+    Layout = "_Layout";
+}
+
+<div class="d-flex align-items-center justify-content-center" style="min-height: 80vh;">
+    <div class="card shadow-lg border-0 rounded-4" style="width: 100%; max-width: 420px;">
+
+        <!-- Encabezado de la tarjeta -->
+        <div class="card-header bg-primary text-white text-center py-4 border-0 rounded-top-4">
+            <h3 class="mb-0 fw-bold">Artemis Banking Pro</h3>
+        </div>
+
+        <!-- Cuerpo del formulario -->
+        <div class="card-body p-4 p-md-5 bg-white">
+
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success rounded-3 shadow-sm p-3 mb-4 fw-bold text-center">
+                    @TempData["SuccessMessage"]
+                </div>
+            }
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger rounded-3 shadow-sm p-3 mb-4 fw-bold text-center">
+                    @TempData["ErrorMessage"]
+                </div>
+            }
+
+            <!-- Resumen de errores de validación -->
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert alert-danger rounded-3 shadow-sm p-3 mb-4">
+                    <div asp-validation-summary="All" class="text-danger mb-0 small fw-bold"></div>
+                </div>
+            }
+
+            <form asp-action="Login" method="post">
+
+                <!-- Nombre de usuario -->
+                <div class="mb-4">
+                    <label asp-for="UserName" class="form-label fw-bold text-secondary">Nombre de usuario</label>
+                    <input asp-for="UserName" class="form-control form-control-lg rounded-3 bg-light border-0" placeholder="Ingrese su usuario" autocomplete="off" />
+                    <span asp-validation-for="UserName" class="text-danger small fw-semibold"></span>
+                </div>
+
+                <!-- Contraseña -->
+                <div class="mb-4">
+                    <label asp-for="Password" class="form-label fw-bold text-secondary">Contraseña</label>
+                    <input asp-for="Password" class="form-control form-control-lg rounded-3 bg-light border-0" placeholder="Ingrese su contraseña" />
+                    <span asp-validation-for="Password" class="text-danger small fw-semibold"></span>
+                </div>
+
+                <!-- Botón de Iniciar sesión -->
+                <div class="d-grid gap-2 mt-5 mb-2">
+                    <button type="submit" class="btn btn-primary btn-lg fw-bold shadow-sm rounded-3">
+                        Iniciar sesión
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Pie de la tarjeta -->
+        <div class="card-footer text-center py-4 bg-light border-0 rounded-bottom-4">
+            <a href="@Url.Action("ForgotPassword", "Account")" class="text-decoration-none text-secondary">
+                ¿Olvidó sus credenciales? <span class="text-primary fw-bold">Restablecer contraseña</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -1,0 +1,33 @@
+﻿@model ArtemisBankingPro.Core.Application.Loans.CreateLoan.CreateLoanCommand
+
+@{
+    ViewData["Title"] = "Advertencia de Riesgo";
+    Layout = "_Layout";
+    string warningMsg = ViewBag.WarningMessage as string ?? "El cliente se considera de alto riesgo.";
+}
+
+<div class="container py-5" style="max-width: 600px;">
+    <div class="card border-0 shadow-lg rounded-4 p-4 p-md-5 bg-white text-center">
+        <div class="mb-3 text-warning">
+            <i class="bi bi-exclamation-triangle-fill display-3"></i>
+        </div>
+        <h2 class="fw-bold text-dark mb-3">Evaluación de Riesgo</h2>
+        <div class="alert alert-warning rounded-3 shadow-sm p-3 mb-4 text-start">
+            <strong>Atención:</strong> @warningMsg
+        </div>
+        <p class="text-muted mb-4">¿Desea continuar con la asignación de este préstamo de todas formas?</p>
+
+        <form asp-action="Create" method="post">
+            <input type="hidden" asp-for="ClientId" />
+            <input type="hidden" asp-for="CapitalAmount" />
+            <input type="hidden" asp-for="TermInMonths" />
+            <input type="hidden" asp-for="AnnualInterestRate" />
+            <input type="hidden" name="confirmHighRisk" value="true" />
+
+            <div class="d-flex justify-content-between">
+                <a asp-action="Index" class="btn btn-outline-secondary px-4 rounded-3 fw-semibold">Cancelar</a>
+                <button type="submit" class="btn btn-danger px-4 rounded-3 fw-bold shadow-sm">Confirmar asignación</button>
+            </div>
+        </form>
+    </div>
+</div>

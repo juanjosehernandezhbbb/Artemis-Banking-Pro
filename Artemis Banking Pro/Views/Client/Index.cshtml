@@ -1,0 +1,237 @@
+﻿@model ArtemisBankingPro.WebApp.ViewModels.ClientDashboardViewModel
+
+@{
+    ViewData["Title"] = "Mi Panel";
+}
+
+<style>
+    /* Efecto de tarjetas modernas */
+    .glass-card {
+        background: #ffffff;
+        border: none;
+        border-radius: 1.25rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+        transition: all 0.3s ease;
+    }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+        }
+
+    /* Tarjeta de crédito visual */
+    .cc-card {
+        background: linear-gradient(135deg, #1e1e1e 0%, #3a3a3a 100%);
+        color: white;
+        border: none;
+        border-radius: 1.25rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        transition: transform 0.3s ease;
+    }
+
+        .cc-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.25);
+        }
+
+        .cc-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+    .account-principal {
+        border-left: 5px solid #0d6efd;
+    }
+
+    .progress-thin {
+        height: 6px;
+        border-radius: 10px;
+    }
+</style>
+
+<!-- Contenido del Dashboard -->
+<div class="container pb-5">
+
+    <!-- Bloque para mostrar mensajes de éxito o error (TempData) -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm mb-4 border-0" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-4 shadow-sm mb-4 border-0" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="d-flex justify-content-between align-items-end mb-4 text-start">
+        <div>
+            <h2 class="fw-bold text-dark mb-0">Mis Productos Financieros</h2>
+            <p class="text-muted mb-0">Resumen actualizado de sus cuentas, tarjetas y préstamos.</p>
+        </div>
+    </div>
+
+    @if (!Model.HasProducts)
+    {
+        <div class="alert alert-info text-center py-5 rounded-4 shadow-sm border-0 bg-white">
+            <div class="bg-info bg-opacity-10 rounded-circle d-inline-flex p-4 mb-3">
+                <i class="bi bi-box2 display-4 text-info"></i>
+            </div>
+            <h4 class="fw-bold text-dark">No posee productos financieros activos.</h4>
+            <p class="text-muted mb-0">Comuníquese con un administrador para asignar productos a su cuenta.</p>
+        </div>
+    }
+    else
+    {
+        <!-- Contenedor Principal: Fila única con columnas por categoría -->
+        <div class="row g-4 align-items-start text-start">
+
+            <!-- Columna: Cuentas de Ahorro -->
+            @if (Model.CuentasAhorro.Any())
+            {
+                <div class="col-md-6 col-xl-4">
+                    <h5 class="fw-bold text-secondary text-uppercase mb-3">
+                        <i class="bi bi-piggy-bank text-primary me-2"></i>Cuentas
+                    </h5>
+                    <div class="d-flex flex-column gap-3">
+                        @foreach (var cuenta in Model.CuentasAhorro)
+                        {
+                            bool isPrincipal = cuenta.TipoCuenta.ToString() == "Principal" || (int)cuenta.TipoCuenta == 0;
+                            <div class="card glass-card w-100 @(isPrincipal ? "account-principal" : "")">
+                                <div class="card-body p-4">
+                                    <div class="d-flex justify-content-between align-items-start mb-4">
+                                        <div class="bg-light rounded p-2 text-primary">
+                                            <i class="bi bi-wallet2 fs-4"></i>
+                                        </div>
+                                        <span class="badge bg-@(isPrincipal ? "primary" : "info text-dark bg-opacity-25") rounded-pill px-3 py-2 fw-bold">
+                                            @cuenta.TipoCuenta
+                                        </span>
+                                    </div>
+                                    <h6 class="text-muted small fw-bold text-uppercase mb-1">Número de Cuenta</h6>
+                                    <h5 class="font-monospace fw-bold text-dark mb-4">@cuenta.NumeroCuenta</h5>
+
+                                    <h6 class="text-muted small fw-bold text-uppercase mb-1">Balance Disponible</h6>
+                                    <h3 class="fw-bold text-success mb-4">RD$@cuenta.Balance.ToString("N2")</h3>
+
+                                    <a asp-action="AccountTransactions" asp-route-id="@cuenta.Id" class="btn btn-light w-100 fw-bold border text-primary rounded-pill shadow-sm">Ver transacciones</a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Columna: Tarjetas de Crédito -->
+            @if (Model.TarjetasCredito.Any())
+            {
+                <div class="col-md-6 col-xl-4">
+                    <h5 class="fw-bold text-secondary text-uppercase mb-3">
+                        <i class="bi bi-credit-card text-primary me-2"></i>Tarjetas
+                    </h5>
+                    <div class="d-flex flex-column gap-3">
+                        @foreach (var tarjeta in Model.TarjetasCredito)
+                        {
+                            string last4 = tarjeta.NumeroTarjeta.Length >= 4 ? tarjeta.NumeroTarjeta.Substring(tarjeta.NumeroTarjeta.Length - 4) : tarjeta.NumeroTarjeta;
+
+                            <div class="card cc-card w-100 p-4">
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <i class="bi bi-sim text-warning fs-2 opacity-75"></i>
+                                    <span class="fw-bold text-white-50">Exp: @tarjeta.FechaExpiracion</span>
+                                </div>
+                                <h4 class="font-monospace fw-bold mb-4 text-white shadow-sm">**** **** **** @last4</h4>
+
+                                <div class="row g-2 mb-4">
+                                    <div class="col-6">
+                                        <small class="text-white-50 small fw-bold text-uppercase">Límite</small>
+                                        <h6 class="fw-bold mb-0 text-white">RD$@tarjeta.LimiteCredito.ToString("N2")</h6>
+                                    </div>
+                                    <div class="col-6 text-end">
+                                        <small class="text-white-50 small fw-bold text-uppercase">Adeudado</small>
+                                        <h6 class="fw-bold text-warning mb-0">RD$@tarjeta.MontoAdeudado.ToString("N2")</h6>
+                                    </div>
+                                </div>
+
+                                <a asp-action="CreditCardConsumptions" asp-route-id="@tarjeta.Id" class="btn btn-outline-light w-100 fw-bold rounded-pill border-2">Ver consumos</a>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Columna: Préstamos -->
+            @if (Model.Prestamos.Any())
+            {
+                <div class="col-md-12 col-xl-4">
+                    <h5 class="fw-bold text-secondary text-uppercase mb-3">
+                        <i class="bi bi-cash-stack text-primary me-2"></i>Préstamos
+                    </h5>
+                    <div class="d-flex flex-column gap-3">
+                        @foreach (var prestamo in Model.Prestamos)
+                        {
+                            int cuotasPagadas = prestamo.Cuotas?.Count(c => (int)c.EstadoPago == 2) ?? 0;
+                            int cuotasTotales = prestamo.Cuotas?.Count ?? 0;
+                            bool enMora = prestamo.Cuotas?.Any(c => c.FechaVencimiento < DateTime.Now && (int)c.EstadoPago != 2) ?? false;
+                            decimal montoPendiente = prestamo.Cuotas?.Where(c => (int)c.EstadoPago != 2).Sum(c => c.SaldoPendiente) ?? 0m;
+                            int progresoPorcentaje = cuotasTotales > 0 ? (int)Math.Round((double)cuotasPagadas / cuotasTotales * 100) : 0;
+
+                            <div class="card glass-card w-100">
+                                <div class="card-body p-4">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-light rounded p-2 text-dark me-2">
+                                                <i class="bi bi-file-earmark-text fs-5"></i>
+                                            </div>
+                                            <h6 class="fw-bold text-dark mb-0">Préstamo <span class="text-muted">#@prestamo.NumeroPrestamo</span></h6>
+                                        </div>
+                                        <span class="badge bg-@(enMora ? "danger" : "success bg-opacity-25 text-success") px-2 py-1 rounded-pill fw-bold small">
+                                            @(enMora ? "En Mora" : "Al Día")
+                                        </span>
+                                    </div>
+
+                                    <div class="row mb-3 mt-4">
+                                        <div class="col-sm-6 mb-3 mb-sm-0">
+                                            <small class="text-muted small fw-bold text-uppercase">Capital</small>
+                                            <h5 class="fw-bold text-dark">RD$@prestamo.CapitalAprobado.ToString("N2")</h5>
+                                        </div>
+                                        <div class="col-sm-6 text-sm-end">
+                                            <small class="text-muted small fw-bold text-uppercase">Pendiente</small>
+                                            <h5 class="fw-bold text-danger">RD$@montoPendiente.ToString("N2")</h5>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <div class="d-flex justify-content-between small fw-bold mb-1">
+                                            <span class="text-muted">Progreso</span>
+                                            <span class="text-primary">@cuotasPagadas de @cuotasTotales</span>
+                                        </div>
+                                        <div class="progress progress-thin bg-light">
+                                            <div class="progress-bar bg-primary" role="progressbar" style="width: @progresoPorcentaje%"></div>
+                                        </div>
+                                        <div class="d-flex justify-content-between small text-muted mt-2 fw-semibold">
+                                            <span>Tasa: @prestamo.TasaInteresAnual%</span>
+                                            <span>Plazo: @prestamo.PlazoMeses M</span>
+                                        </div>
+                                    </div>
+
+                                    <a asp-action="LoanDetails" asp-route-id="@prestamo.Id" class="btn btn-outline-dark w-100 fw-bold rounded-pill">Ver tabla</a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

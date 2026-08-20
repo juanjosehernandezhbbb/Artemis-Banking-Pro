@@ -1,0 +1,56 @@
+﻿@model ArtemisBankingPro.Core.Domain.Entities.TarjetaCredito
+
+@{
+    ViewData["Title"] = "Consumos de la Tarjeta";
+    Layout = "_Layout";
+    string last4 = Model.NumeroTarjeta.Length >= 4 ? Model.NumeroTarjeta[^4..] : Model.NumeroTarjeta;
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">Consumos y Movimientos</h2>
+            <p class="text-muted mb-0">Tarjeta terminada en: <span class="font-monospace fw-bold text-dark">**** **** **** @last4</span></p>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-secondary rounded-3 px-4 fw-semibold">Volver al Panel</a>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light text-uppercase fs-7">
+                    <tr>
+                        <th class="ps-4">Fecha</th>
+                        <th>Comercio / Origen</th>
+                        <th>Operación</th>
+                        <th class="text-end">Monto Cargado</th>
+                        <th class="text-center pe-4">Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Consumos != null && Model.Consumos.Any())
+                    {
+                        foreach (var consumo in Model.Consumos.OrderByDescending(t => t.Fecha))
+                        {
+                            <tr>
+                                <td class="ps-4">@consumo.Fecha.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td class="fw-semibold text-dark">@consumo.Origen</td>
+                                <td><span class="badge bg-info text-dark">@consumo.TipoOperacion</span></td>
+                                <td class="text-end fw-bold text-danger">RD$@consumo.Monto.ToString("N2")</td>
+                                <td class="text-center pe-4">
+                                    <span class="badge bg-@(consumo.Estado.ToString() == "Aprobada" ? "success" : "danger")">@consumo.Estado</span>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-muted">No hay consumos registrados con esta tarjeta.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

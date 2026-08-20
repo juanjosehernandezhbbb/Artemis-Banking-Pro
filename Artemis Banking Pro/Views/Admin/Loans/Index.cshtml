@@ -1,0 +1,124 @@
+﻿@model ArtemisBankingPro.Core.Application.Common.Models.PagedResult<ArtemisBankingPro.Core.Application.Loans.GetLoans.LoanListItemDto>
+
+@{
+    ViewData["Title"] = "Gestión de Préstamos";
+    Layout = "_Layout";
+    string currentStatus = ViewBag.CurrentStatus as string ?? "Activos";
+    string currentId = ViewBag.CurrentIdentification as string ?? "";
+}
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 fw-bold text-dark">Gestión de Préstamos</h1>
+            <p class="text-muted mb-0">Administración de créditos, amortizaciones y tasas de interés.</p>
+        </div>
+        <a asp-action="SelectClient" class="btn btn-primary fw-bold rounded-3 shadow-sm px-4">
+            <i class="bi bi-cash-stack me-2"></i> Asignar préstamo
+        </a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Herramientas de Búsqueda y Filtros -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4 p-3 bg-white">
+        <form method="get" asp-action="Index" class="row g-3 align-items-center">
+            <div class="col-md-5">
+                <label for="identification" class="form-label fw-semibold text-muted small">Buscar por Cédula del Cliente:</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0 rounded-start-3"><i class="bi bi-search"></i></span>
+                    <input type="text" id="identification" name="identification" value="@currentId" class="form-control border-start-0 rounded-end-3 shadow-sm" placeholder="Ej. 001-0000000-0" />
+                </div>
+            </div>
+            <div class="col-md-4">
+                <label for="status" class="form-label fw-semibold text-muted small">Filtrar por Estado:</label>
+                <select id="status" name="status" class="form-select rounded-3 shadow-sm">
+                    <option value="Activos" selected="@(currentStatus == "Activos")">Activos</option>
+                    <option value="Completados" selected="@(currentStatus == "Completados")">Completados</option>
+                    <option value="Todos" selected="@(currentStatus == "Todos")">Todos</option>
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-dark w-100 rounded-3 shadow-sm fw-semibold mt-4">
+                    <i class="bi bi-filter me-1"></i> Aplicar Filtros
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Tabla de Préstamos -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light text-uppercase fs-7">
+                    <tr>
+                        <th class="ps-4">No. Préstamo</th>
+                        <th>Cliente</th>
+                        <th>Capital Aprobado</th>
+                        <th>Cuotas</th>
+                        <th>Pendiente</th>
+                        <th>Tasa Anual</th>
+                        <th>Estado Préstamo</th>
+                        <th>Estado Cliente</th>
+                        <th class="text-end pe-4">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Data != null && Model.Data.Any())
+                    {
+                        foreach (var loan in Model.Data)
+                        {
+                            <tr>
+                                <td class="ps-4 fw-bold text-dark">@loan.LoanNumber</td>
+                                <td>@loan.ClientFullName</td>
+                                <td>RD$@loan.CapitalAmount.ToString("N2")</td>
+                                <td>@loan.PaidInstallments / @loan.TotalInstallments</td>
+                                <td class="fw-semibold text-danger">RD$@loan.PendingAmount.ToString("N2")</td>
+                                <td>@loan.AnnualInterestRate%</td>
+                                <td>
+                                    <span class="badge bg-@(loan.Status == "Activo" ? "success" : "secondary") px-3 py-2 rounded-pill">
+                                        @loan.Status
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-@(loan.ClientPaymentStatus == "Al día" ? "info text-dark" : "danger") px-3 py-2 rounded-pill">
+                                        @loan.ClientPaymentStatus
+                                    </span>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="btn-group" role="group">
+                                        <a asp-action="Details" asp-route-id="@loan.Id" class="btn btn-sm btn-outline-info rounded-start-3" title="Ver tabla de amortización">
+                                            <i class="bi bi-eye"></i> Detalles
+                                        </a>
+                                        <a asp-action="EditRate" asp-route-id="@loan.Id" class="btn btn-sm btn-outline-primary rounded-end-3" title="Modificar tasa de interés">
+                                            <i class="bi bi-pencil-square"></i> Editar Tasa
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="9" class="text-center py-4 text-muted">No se encontraron préstamos registrados.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

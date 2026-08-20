@@ -1,0 +1,164 @@
+﻿@model ArtemisBankingPro.Core.Application.Common.Models.PagedResult<ArtemisBankingPro.Core.Application.CreditCards.GetCreditCards.CreditCardListItemDto>
+
+@{
+    ViewData["Title"] = "Gestión de Tarjetas de Crédito";
+    Layout = "_Layout";
+    string currentStatus = ViewBag.CurrentStatus as string ?? "Activas";
+    string currentId = ViewBag.CurrentIdentification as string ?? "";
+}
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 fw-bold text-dark">Gestión de Tarjetas de Crédito</h1>
+            <p class="text-muted mb-0">Administración de límites, consumos y estados de tarjetas.</p>
+        </div>
+        <a asp-action="SelectClient" class="btn btn-primary fw-bold rounded-3 shadow-sm px-4">
+            <i class="bi bi-credit-card-fill me-2"></i> Asignar tarjeta de crédito
+        </a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Filtros y Búsqueda -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4 p-3 bg-white">
+        <form method="get" asp-action="Index" class="row g-3 align-items-center">
+            <div class="col-md-5">
+                <label for="identification" class="form-label fw-semibold text-muted small">Buscar por Cédula del Cliente:</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0 rounded-start-3"><i class="bi bi-search"></i></span>
+                    <input type="text" id="identification" name="identification" value="@currentId" class="form-control border-start-0 rounded-end-3 shadow-sm" placeholder="Ej. 001-0000000-0" />
+                </div>
+            </div>
+            <div class="col-md-4">
+                <label for="status" class="form-label fw-semibold text-muted small">Filtrar por Estado:</label>
+                <select id="status" name="status" class="form-select rounded-3 shadow-sm">
+                    <option value="Activas" selected="@(currentStatus == "Activas")">Activas</option>
+                    <option value="Canceladas" selected="@(currentStatus == "Canceladas")">Canceladas</option>
+                    <option value="Todas" selected="@(currentStatus == "Todas")">Todas</option>
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-dark w-100 rounded-3 shadow-sm fw-semibold mt-4">
+                    <i class="bi bi-filter me-1"></i> Aplicar Filtros
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Tabla de Tarjetas -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light text-uppercase fs-7">
+                    <tr>
+                        <th class="ps-4">No. Tarjeta</th>
+                        <th>Cliente</th>
+                        <th>Límite de Crédito</th>
+                        <th>Expiración</th>
+                        <th>Monto Adeudado</th>
+                        <th>Estado</th>
+                        <th class="text-end pe-4">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Data != null && Model.Data.Any())
+                    {
+                        foreach (var card in Model.Data)
+                        {
+                            <tr>
+                                <td class="ps-4 fw-bold text-dark font-monospace">@card.MaskedCardNumber</td>
+                                <td>@card.ClientFullName</td>
+                                <td>RD$@card.CreditLimit.ToString("N2")</td>
+                                <td>@card.ExpirationDate</td>
+                                <td class="fw-semibold text-danger">RD$@card.CurrentDebt.ToString("N2")</td>
+                                <td>
+                                    <span class="badge bg-@(card.Status == "Activa" ? "success" : "secondary") px-3 py-2 rounded-pill">
+                                        @card.Status
+                                    </span>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="btn-group" role="group">
+                                        <a asp-action="Details" asp-route-id="@card.Id" class="btn btn-sm btn-outline-info rounded-start-3" title="Ver consumos">
+                                            <i class="bi bi-eye"></i> Detalles
+                                        </a>
+                                        @if (card.Status == "Activa")
+                                        {
+                                            <a asp-action="EditLimit" asp-route-id="@card.Id" class="btn btn-sm btn-outline-primary" title="Modificar límite">
+                                                <i class="bi bi-pencil-square"></i> Editar
+                                            </a>
+                                            <button type="button"
+                                                    class="btn btn-sm btn-outline-danger rounded-end-3"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#cancelModal"
+                                                    data-cardid="@card.Id"
+                                                    data-cardmasked="@card.MaskedCardNumber"
+                                                    title="Cancelar tarjeta">
+                                                Cancelar
+                                            </button>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">No se encontraron tarjetas de crédito registradas.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmación de Cancelación -->
+<div class="modal fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-dark" id="cancelModalLabel">Cancelar Tarjeta de Crédito</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-4">
+                <p id="cancelModalMessage" class="fs-6 text-muted mb-0">¿Está seguro que desea cancelar la tarjeta?</p>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary rounded-3 px-4 fw-semibold" data-bs-dismiss="modal">Cancelar</button>
+                <form id="cancelForm" asp-action="Cancel" method="post" class="d-inline">
+                    <input type="hidden" id="modalCardId" name="id" />
+                    <button type="submit" class="btn btn-danger rounded-3 px-4 fw-bold shadow-sm">Aceptar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        var cancelModal = document.getElementById('cancelModal');
+        cancelModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var cardId = button.getAttribute('data-cardid');
+            var cardMasked = button.getAttribute('data-cardmasked');
+
+            document.getElementById('modalCardId').value = cardId;
+            document.getElementById('cancelModalMessage').textContent = "¿Está seguro que desea cancelar la tarjeta " + cardMasked + "?";
+        });
+    </script>
+}

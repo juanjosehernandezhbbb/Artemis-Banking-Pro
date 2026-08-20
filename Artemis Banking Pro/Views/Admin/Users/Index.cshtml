@@ -1,0 +1,217 @@
+﻿@model ArtemisBankingPro.Core.Application.Common.Models.PagedResult<ArtemisBankingPro.Core.Application.Common.Models.UserDto>
+
+@{
+    ViewData["Title"] = "Gestión de Usuarios";
+    Layout = "_Layout";
+    string currentRole = ViewBag.CurrentRole as string ?? "";
+}
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 fw-bold text-dark">Gestión de Usuarios</h1>
+            <p class="text-muted mb-0">Administración de accesos, estados y roles del sistema.</p>
+        </div>
+        <a asp-action="Create" class="btn btn-primary fw-bold rounded-3 shadow-sm px-4">
+            <i class="bi bi-person-plus-fill me-2"></i> Crear usuario
+        </a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Filtro por Rol -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4 p-3 bg-white">
+        <form method="get" asp-action="Index" class="row g-3 align-items-center">
+            <div class="col-md-4">
+                <label for="roleFilter" class="form-label fw-semibold text-muted">Filtrar por Tipo de Usuario:</label>
+                <select id="roleFilter" name="role" class="form-select rounded-3 shadow-sm" onchange="this.form.submit()">
+                    <option value="">Todos (Excluyendo Comercio)</option>
+                    <option value="Administrador" selected="@(currentRole == "Administrador")">Administrador</option>
+                    <option value="Cajero" selected="@(currentRole == "Cajero")">Cajero</option>
+                    <option value="Cliente" selected="@(currentRole == "Cliente")">Cliente</option>
+                </select>
+            </div>
+        </form>
+    </div>
+
+    <!-- Tabla de Usuarios -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light text-uppercase fs-7">
+                    <tr>
+                        <th class="ps-4">Usuario</th>
+                        <th>Nombre Completo</th>
+                        <th>Cédula</th>
+                        <th>Correo Electrónico</th>
+                        <th>Tipo</th>
+                        <th>Estado</th>
+                        <th class="text-end pe-4">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Data != null && Model.Data.Any())
+                    {
+                        foreach (var user in Model.Data)
+                        {
+                            <tr>
+                                <td class="ps-4 fw-bold text-dark">@user.UserName</td>
+                                <td>@user.FirstName @user.LastName</td>
+                                <td>@user.Identification</td>
+                                <td>@user.Email</td>
+                                <td>
+                                    <span class="badge bg-@(user.Role == "Administrador" ? "danger" : user.Role == "Cajero" ? "warning text-dark" : "info text-dark") px-3 py-2 rounded-pill">
+                                        @user.Role
+                                    </span>
+                                </td>
+                                <td>
+                                    @if (user.IsActive)
+                                    {
+                                        <span class="badge bg-success px-3 py-2 rounded-pill">Activo</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary px-3 py-2 rounded-pill">Inactivo</span>
+                                    }
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="btn-group" role="group">
+                                        <!-- Botón de Editar -->
+                                        <a asp-action="Edit" asp-route-id="@user.Id" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-pencil-square"></i> Editar
+                                        </a>
+
+                                        <!-- Botón de Activar / Inactivar Estado -->
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-@(user.IsActive ? "danger" : "success")"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#statusModal"
+                                                data-bs-userid="@user.Id"
+                                                data-bs-isactive="@user.IsActive.ToString().ToLower()">
+                                            @(user.IsActive ? "Inactivar" : "Activar")
+                                        </button>
+
+                                        <!-- Botón de Reenviar Correo (Solo aparece si el usuario está Inactivo) -->
+                                        @if (!user.IsActive)
+                                        {
+                                            <button type="button"
+                                                    class="btn btn-sm btn-warning"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#resendModal"
+                                                    data-bs-userid="@user.Id"
+                                                    title="Reenviar correo de activación">
+                                                <i class="bi bi-envelope"></i> Reenviar
+                                            </button>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">No se encontraron usuarios registrados.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmación de Estado -->
+<div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-dark" id="statusModalLabel">Confirmación de Estado</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-4">
+                <p id="statusModalMessage" class="fs-6 text-muted mb-0">¿Está seguro que desea cambiar el estado de este usuario?</p>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary rounded-3 px-4 fw-semibold" data-bs-dismiss="modal">Cancelar</button>
+                <form id="statusForm" asp-action="ToggleStatus" method="post" class="d-inline">
+                    <input type="hidden" id="modalUserId" name="id" />
+                    <button type="submit" id="statusModalSubmitBtn" class="btn btn-danger rounded-3 px-4 fw-bold shadow-sm">Aceptar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmación de Reenvío de Correo -->
+<div class="modal fade" id="resendModal" tabindex="-1" aria-labelledby="resendModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-dark" id="resendModalLabel">Reenviar Correo de Activación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-4">
+                <p class="fs-6 text-muted mb-0">¿Desea reenviar el correo de activación a este usuario?</p>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary rounded-3 px-4 fw-semibold" data-bs-dismiss="modal">Cancelar</button>
+                <form id="resendForm" asp-action="ResendActivationEmail" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="modalResendUserId" name="id" />
+                    <button type="submit" class="btn btn-warning rounded-3 px-4 fw-bold shadow-sm text-dark">Reenviar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Script para el modal de Estado
+        var statusModal = document.getElementById('statusModal');
+        statusModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            var userId = button.getAttribute('data-bs-userid');
+            var isActive = button.getAttribute('data-bs-isactive') === 'true';
+
+            var modalUserIdInput = document.getElementById('modalUserId');
+            var modalMessage = document.getElementById('statusModalMessage');
+            var submitBtn = document.getElementById('statusModalSubmitBtn');
+
+            modalUserIdInput.value = userId;
+
+            if (isActive) {
+                modalMessage.textContent = "¿Está seguro que desea inactivar este usuario?";
+                submitBtn.className = "btn btn-danger rounded-3 px-4 fw-bold shadow-sm";
+                submitBtn.textContent = "Inactivar";
+            } else {
+                modalMessage.textContent = "¿Está seguro que desea activar este usuario?";
+                submitBtn.className = "btn btn-success rounded-3 px-4 fw-bold shadow-sm";
+                submitBtn.textContent = "Activar";
+            }
+        });
+
+        // Script para el modal de Reenviar Correo
+        var resendModal = document.getElementById('resendModal');
+        if (resendModal) {
+            resendModal.addEventListener('show.bs.modal', function (event) {
+                var button = event.relatedTarget;
+                var userId = button.getAttribute('data-bs-userid');
+                document.getElementById('modalResendUserId').value = userId;
+            });
+        }
+    </script>
+}

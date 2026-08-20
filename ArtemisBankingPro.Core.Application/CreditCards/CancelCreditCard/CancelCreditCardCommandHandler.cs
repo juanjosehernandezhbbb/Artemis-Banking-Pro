@@ -33,6 +33,9 @@ namespace ArtemisBankingPro.Core.Application.CreditCards.CancelCreditCard
 
             tarjeta.Estado = EstadoTarjeta.Cancelada;
             tarjetaRepo.Update(tarjeta);
+
+            // Persiste los cambios definitivamente en la base de datos
+            await _unitOfWork.SaveChangesAsync();
         }
     }
 }

@@ -1,0 +1,117 @@
+﻿@model Artemis_Banking_Pro.Models.ViewModels.AdminDashboardViewModel
+
+@{
+    ViewData["Title"] = "Panel de Administración";
+    Layout = "_Layout";
+}
+
+<div class="container-fluid py-2">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="h3 fw-bold text-dark">Panel de Control - Administrador</h1>
+            <p class="text-muted">Resumen general del estado de la plataforma e indicadores de operaciones.</p>
+        </div>
+    </div>
+
+    <!-- Indicadores: Fila 1 (Transacciones y Pagos) -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 bg-primary text-white p-3">
+                <div class="card-body">
+                    <h6 class="text-uppercase fw-semibold mb-2">Transacciones Históricas</h6>
+                    <h2 class="display-6 fw-bold mb-0">@Model.TotalTransactionsHistorical</h2>
+                    <small class="text-white-50">Total registradas</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 bg-secondary text-white p-3">
+                <div class="card-body">
+                    <h6 class="text-uppercase fw-semibold mb-2">Transacciones del Día</h6>
+                    <h2 class="display-6 fw-bold mb-0">@Model.TransactionsToday</h2>
+                    <small class="text-white-50">Registradas hoy</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 bg-success text-white p-3">
+                <div class="card-body">
+                    <h6 class="text-uppercase fw-semibold mb-2">Pagos Históricos</h6>
+                    <h2 class="display-6 fw-bold mb-0">@Model.TotalPaymentsHistorical</h2>
+                    <small class="text-white-50">Préstamos y tarjetas</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 bg-dark text-white p-3">
+                <div class="card-body">
+                    <h6 class="text-uppercase fw-semibold mb-2">Pagos del Día</h6>
+                    <h2 class="display-6 fw-bold mb-0">@Model.PaymentsToday</h2>
+                    <small class="text-white-50">Procesados hoy</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Indicadores: Fila 2 (Clientes y Productos Financieros) -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 bg-info text-white p-3">
+                <div class="card-body">
+                    <h6 class="text-uppercase fw-semibold mb-2">Clientes Activos</h6>
+                    <h2 class="display-6 fw-bold mb-0">@Model.ActiveClients</h2>
+                    <small class="text-white-50">Rol Cliente activo</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 bg-danger text-white p-3">
+                <div class="card-body">
+                    <h6 class="text-uppercase fw-semibold mb-2">Clientes Inactivos</h6>
+                    <h2 class="display-6 fw-bold mb-0">@Model.InactiveClients</h2>
+                    <small class="text-white-50">Pendientes / Inactivos</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 bg-warning text-dark p-3">
+                <div class="card-body">
+                    <h6 class="text-uppercase fw-semibold mb-2">Total Productos</h6>
+                    <h2 class="display-6 fw-bold mb-0">@Model.TotalFinancialProducts</h2>
+                    <small class="text-dark-50">Activos asignados</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm rounded-4 bg-primary text-white p-3">
+                <div class="card-body">
+                    <h6 class="text-uppercase fw-semibold mb-2">Deuda Promedio</h6>
+                    <h2 class="fs-4 fw-bold mb-0 mt-2">RD$@Model.AverageClientDebt.ToString("N2")</h2>
+                    <small class="text-white-50">Por cliente activo</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Indicadores: Fila 3 (Desglose de Productos) -->
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+                <h6 class="text-uppercase text-muted fw-bold mb-2">Préstamos Vigentes</h6>
+                <h3 class="fw-bold text-dark mb-0">@Model.ActiveLoans</h3>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+                <h6 class="text-uppercase text-muted fw-bold mb-2">Tarjetas de Crédito Activas</h6>
+                <h3 class="fw-bold text-dark mb-0">@Model.ActiveCreditCards</h3>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+                <h6 class="text-uppercase text-muted fw-bold mb-2">Cuentas de Ahorro Activas</h6>
+                <h3 class="fw-bold text-dark mb-0">@Model.ActiveSavingsAccounts</h3>
+            </div>
+        </div>
+    </div>
+</div>

@@ -137,7 +137,10 @@ namespace ArtemisBankingPro.Infrastructure.Identity
 
         public async Task<string> GenerateEmailConfirmationTokenAsync(ApplicationUser user)
         {
-            return await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var nativeToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var combined = $"{user.Id}:{nativeToken}";
+
+            return WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(combined));
         }
 
         public async Task SetUserActiveStatusAsync(string id, bool status)
@@ -219,7 +222,8 @@ namespace ArtemisBankingPro.Infrastructure.Identity
                     x.User.Apellido,
                     x.User.Email,
                     x.RoleName,
-                    x.User.Activo
+                    x.User.Activo,
+                    x.User.EmailConfirmed
                 ))
                 .ToListAsync();
 

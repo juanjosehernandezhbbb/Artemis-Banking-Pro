@@ -18,7 +18,7 @@ namespace ArtemisBankingPro.Core.Application.Loans.CreateLoan
         private readonly IAccountNumberGenerator _accountNumberGenerator;
         private readonly IDateTimeProvider _dateTimeProvider;
         private readonly ILoanCalculatorService _loanCalculator;
-        private readonly IEmailService _emailService; 
+        private readonly IEmailService _emailService;
 
         public CreateLoanCommandHandler(
             IIdentityService identityService,
@@ -66,7 +66,7 @@ namespace ArtemisBankingPro.Core.Application.Loans.CreateLoan
             var totalPrestamosDebt = pendingCuotas.Sum(c => c.ValorCuota);
 
             var totalSystemDebt = totalTarjetasDebt + totalPrestamosDebt;
-            var activeClientsCount = await _identityService.GetActiveClientCountAsync(); 
+            var activeClientsCount = await _identityService.GetActiveClientCountAsync();
             var averageSystemDebt = activeClientsCount > 0 ? totalSystemDebt / activeClientsCount : 0;
 
             var clientTarjetas = await tarjetaRepo.FindAsync(t => t.ClienteId == request.ClientId);
@@ -75,7 +75,12 @@ namespace ArtemisBankingPro.Core.Application.Loans.CreateLoan
             var (monthlyInstallment, totalAmountToPay) = _loanCalculator.CalculateFrenchAmortization(request.CapitalAmount, request.AnnualInterestRate, request.TermInMonths);
             var projectedDebt = currentDebt + totalAmountToPay;
 
-            if (!request.ConfirmHighRisk)
+            // SOLUCIÓN COLD START: Si el sistema no tiene ninguna deuda registrada (es el primer préstamo),
+            // permitimos la creación automáticamente sin bloquear por alto riesgo, 
+            // ya que al ser el único, lógicamente supera el promedio de 0.
+            bool isColdStartSystem = totalSystemDebt == 0 && !allActiveLoans.Any();
+
+            if (!request.ConfirmHighRisk && !isColdStartSystem)
             {
                 if (currentDebt > averageSystemDebt)
                     throw new HighRiskClientException("CurrentHighRisk", currentDebt, projectedDebt, averageSystemDebt);
@@ -94,7 +99,7 @@ namespace ArtemisBankingPro.Core.Application.Loans.CreateLoan
                 PlazoMeses = request.TermInMonths,
                 Estado = EstadoPrestamo.Activo,
                 FechaCreacion = _dateTimeProvider.UtcNow,
-                AdministradorId = request.PerformedByUserId 
+                AdministradorId = request.PerformedByUserId
             };
 
             await prestamoRepo.AddAsync(prestamo);
@@ -106,6 +111,8 @@ namespace ArtemisBankingPro.Core.Application.Loans.CreateLoan
             {
                 await cuotaRepo.AddAsync(cuota);
             }
+
+            await _unitOfWork.SaveChangesAsync();
 
             cuentaPrincipal.Balance += request.CapitalAmount;
             cuentaRepo.Update(cuentaPrincipal);
@@ -129,7 +136,7 @@ namespace ArtemisBankingPro.Core.Application.Loans.CreateLoan
             {
                 await _emailService.SendLoanApprovalEmailAsync(
                     client.Email,
-                    client.FirstName, 
+                    client.FirstName,
                     request.CapitalAmount,
                     loanNumber,
                     request.TermInMonths,
@@ -141,18 +148,18 @@ namespace ArtemisBankingPro.Core.Application.Loans.CreateLoan
             }
 
             return new LoanResponseDto(
-                prestamo.Id.ToString(),
-                prestamo.NumeroPrestamo,
-                client.Id,
-                $"{client.FirstName} {client.LastName}",
-                prestamo.CapitalAprobado,
-                prestamo.PlazoMeses,
-                prestamo.TasaInteresAnual,
-                monthlyInstallment,
-                totalAmountToPay,
-                prestamo.Estado.ToString(),
-                prestamo.FechaCreacion
-            );
+                            prestamo.Id.ToString(),
+                            prestamo.NumeroPrestamo,
+                            client.Id,
+                            $"{client.FirstName} {client.LastName}", // <-- Corregido: comillas dobles de C#
+                            prestamo.CapitalAprobado,
+                            prestamo.PlazoMeses,
+                            prestamo.TasaInteresAnual,
+                            monthlyInstallment,
+                            totalAmountToPay,
+                            prestamo.Estado.ToString(),
+                            prestamo.FechaCreacion
+                        );
         }
     }
 }

@@ -1,67 +1,71 @@
+using ArtemisBankingPro.Core.Application.Account.Login;
 using ArtemisBankingPro.Core.Domain.Entities;
-using ArtemisBankingPro.Core.Domain.Interfaces;
+using ArtemisBankingPro.Persistance;
 using ArtemisBankingPro.Persistance.Context;
-using ArtemisBankingPro.Persistance.Repositories;
 using ArtemisBankingPro.Persistance.Seed;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connectionString));
+// 1. Capa de Persistencia e Infraestructura
+builder.Services.AddPersistenceLayer(builder.Configuration);
 
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
-{
-    options.SignIn.RequireConfirmedAccount = false;
-    options.Password.RequiredLength = 8;
-})
-    .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddDefaultTokenProviders();
+// 2. Registro de MediatR y AutoMapper corregido
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(LoginCommand).Assembly));
+builder.Services.AddAutoMapper(cfg => { }, typeof(LoginCommand).Assembly);
 
-// Persistence DI
-builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-
+// Cookie & Security Settings
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.LoginPath = "/Login/Index";
-    options.AccessDeniedPath = "/Login/AccesoDenegado";
+    options.LoginPath = "/Account/Login";
+    options.AccessDeniedPath = "/Account/AccessDenied";
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
+    options.SlidingExpiration = true;
 });
 
 var app = builder.Build();
 
-// Seed identity data
+// Seed identity data safely on startup
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-    var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
-    await IdentitySeeder.SeedAsync(roleManager, userManager);
+    try
+    {
+        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+        var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+        var context = services.GetRequiredService<ApplicationDbContext>();
+
+        await IdentitySeeder.SeedAsync(roleManager, userManager);
+        await IdentitySeeder.SeedCommerceAsync(userManager, context);
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Ocurrió un error al ejecutar el seeding inicial de la base de datos.");
+    }
 }
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
+    app.UseExceptionHandler("/Account/AccessDenied");
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
 app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapStaticAssets();
-
+// Default Route mapped to Account Controller and Login Action
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Login}/{action=Index}/{id?}")
-    .WithStaticAssets();
+    pattern: "{controller=Account}/{action=Login}/{id?}");
 
 app.Run();

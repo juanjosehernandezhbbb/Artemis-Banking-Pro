@@ -1,0 +1,32 @@
+﻿@model ArtemisBankingPro.Core.Application.Loans.UpdateLoanRate.UpdateLoanRateCommand
+
+@{
+    ViewData["Title"] = "Editar Tasa de Interés";
+    Layout = "_Layout";
+    string loanNumber = ViewBag.LoanNumber as string ?? "";
+}
+
+<div class="container py-4" style="max-width: 600px;">
+    <div class="card border-0 shadow-lg rounded-4 p-4 p-md-5 bg-white">
+        <div class="mb-4">
+            <h2 class="fw-bold text-dark">Modificar Tasa de Interés</h2>
+            <p class="text-muted">Actualice la tasa anual para el préstamo <strong>@loanNumber</strong>. Esto recalculará automáticamente las cuotas futuras pendientes.</p>
+        </div>
+
+        <form asp-action="EditRate" method="post">
+            <input type="hidden" asp-for="Id" />
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-3 mb-4"></div>
+
+            <div class="mb-4">
+                <label asp-for="AnnualInterestRate" class="form-label fw-semibold">Nueva Tasa de Interés Anual (%)</label>
+                <input asp-for="AnnualInterestRate" type="number" step="0.01" class="form-control rounded-3 shadow-sm" />
+                <span asp-validation-for="AnnualInterestRate" class="text-danger small"></span>
+            </div>
+
+            <div class="d-flex justify-content-between mt-5">
+                <a asp-action="Index" class="btn btn-outline-secondary px-4 rounded-3 fw-semibold">Volver atrás</a>
+                <button type="submit" class="btn btn-primary px-5 rounded-3 fw-bold shadow-sm">Modificar tasa</button>
+            </div>
+        </form>
+    </div>
+</div>

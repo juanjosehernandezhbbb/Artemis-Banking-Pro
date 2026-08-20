@@ -1,0 +1,42 @@
+﻿@{
+    ViewData["Title"] = "Confirmar Transferencia";
+    Layout = "_Layout";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white text-center">
+                <h2 class="h4 fw-bold text-dark mb-3">Confirmación de Transferencia</h2>
+                <p class="fs-6 text-muted mb-4">¿Está seguro que desea realizar esta transferencia?</p>
+
+                <ul class="list-group list-group-flush text-start mb-4">
+                    <li class="list-group-item d-flex justify-content-between py-3">
+                        <span class="fw-semibold text-muted">Cuenta de origen:</span>
+                        <span class="fw-bold text-dark">@ViewBag.CuentaOrigenNumero</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between py-3">
+                        <span class="fw-semibold text-muted">Cuenta de destino:</span>
+                        <span class="fw-bold text-dark">@ViewBag.CuentaDestinoNumero</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between py-3">
+                        <span class="fw-semibold text-muted">Monto a transferir:</span>
+                        <span class="fw-bold text-success fs-5">RD$@(((decimal)ViewBag.Monto).ToString("N2"))</span>
+                    </li>
+                </ul>
+
+                <form asp-action="ExecuteTransferBetweenAccounts" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="cuentaOrigenId" value="@ViewBag.CuentaOrigenId" />
+                    <input type="hidden" name="cuentaDestinoId" value="@ViewBag.CuentaDestinoId" />
+                    <input type="hidden" name="monto" value="@ViewBag.Monto" />
+
+                    <div class="d-flex justify-content-center gap-3">
+                        <a asp-action="Index" class="btn btn-outline-secondary rounded-3 px-4 fw-semibold">Cancelar</a>
+                        <button type="submit" class="btn btn-success rounded-3 px-4 fw-bold shadow-sm">Confirmar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>  

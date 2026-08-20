@@ -1,0 +1,35 @@
+﻿@model ArtemisBankingPro.Core.Application.CreditCards.UpdateCreditCardLimit.UpdateCreditCardLimitCommand
+
+@{
+    ViewData["Title"] = "Modificar Límite de Tarjeta";
+    Layout = "_Layout";
+    string cardNumberMasked = ViewBag.CardNumberMasked as string ?? "";
+}
+
+<div class="container py-4" style="max-width: 600px;">
+    <div class="card border-0 shadow-lg rounded-4 p-4 p-md-5 bg-white">
+        <div class="mb-4">
+            <h2 class="fw-bold text-dark">Modificar Límite de Crédito</h2>
+            <p class="text-muted">Actualice el límite para la tarjeta terminada en <strong>@cardNumberMasked</strong>.</p>
+        </div>
+
+        <form asp-action="EditLimit" method="post">
+            <input type="hidden" asp-for="Id" />
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-3 mb-4"></div>
+
+            <div class="mb-4">
+                <label asp-for="CreditLimit" class="form-label fw-semibold">Nuevo Límite de la Tarjeta</label>
+                <div class="input-group">
+                    <span class="input-group-text rounded-start-3">RD$</span>
+                    <input asp-for="CreditLimit" type="number" step="0.01" class="form-control rounded-end-3 shadow-sm" />
+                </div>
+                <span asp-validation-for="CreditLimit" class="text-danger small"></span>
+            </div>
+
+            <div class="d-flex justify-content-between mt-5">
+                <a asp-action="Index" class="btn btn-outline-secondary px-4 rounded-3 fw-semibold">Volver atrás</a>
+                <button type="submit" class="btn btn-primary px-5 rounded-3 fw-bold shadow-sm">Guardar cambios</button>
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,96 @@
+﻿@model IEnumerable<ArtemisBankingPro.WebApp.ViewModels.BeneficiaryListItemViewModel>
+@{
+    ViewData["Title"] = "Mis Beneficiarios";
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark mb-0">Directorio de Beneficiarios</h2>
+            <p class="text-muted mb-0">Administre las cuentas frecuentes para transacciones.</p>
+        </div>
+        <a asp-controller="Client" asp-action="AddBeneficiary" class="btn btn-primary fw-bold rounded-pill shadow-sm px-4">
+            <i class="bi bi-person-plus-fill me-1"></i> Agregar beneficiario
+        </a>
+    </div>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success rounded-3 shadow-sm border-0 fw-semibold mb-4">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["Success"]
+        </div>
+    }
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light text-uppercase text-muted" style="font-size: 0.85rem;">
+                    <tr>
+                        <th class="ps-4 py-3">Nombre del Propietario</th>
+                        <th class="py-3">Número de Cuenta</th>
+                        <th class="text-end pe-4 py-3">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var ben in Model)
+                        {
+                            <tr>
+                                <td class="ps-4 py-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-2 me-3">
+                                            <i class="bi bi-person fs-5"></i>
+                                        </div>
+                                        <div>
+                                            <span class="fw-bold text-dark d-block">@ben.Nombre @ben.Apellido</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-3 font-monospace fw-semibold text-secondary fs-6">
+                                    @ben.NumeroCuenta
+                                </td>
+                                <td class="text-end pe-4 py-3">
+                                    <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3 fw-bold"
+                                            data-bs-toggle="modal" data-bs-target="#deleteModal-@ben.Id">
+                                        <i class="bi bi-trash3 me-1"></i> Eliminar
+                                    </button>
+
+                                    <!-- Modal de Confirmación de Eliminación -->
+                                    <div class="modal fade" id="deleteModal-@ben.Id" tabindex="-1">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content rounded-4 border-0 shadow-lg">
+                                                <div class="modal-header border-0 pb-0">
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body text-center pb-4">
+                                                    <i class="bi bi-exclamation-triangle-fill text-warning display-1 mb-3"></i>
+                                                    <h4 class="fw-bold">¿Está seguro que desea eliminar este beneficiario?</h4>
+                                                    <p class="text-muted">Se eliminará a <strong>@ben.Nombre @ben.Apellido</strong> de su directorio, pero la cuenta no será afectada.</p>
+                                                    <form asp-controller="Client" asp-action="DeleteBeneficiary" method="post" class="mt-4">
+                                                        <input type="hidden" name="id" value="@ben.Id" />
+                                                        <button type="button" class="btn btn-light fw-bold px-4 rounded-pill me-2" data-bs-dismiss="modal">Cancelar</button>
+                                                        <button type="submit" class="btn btn-danger fw-bold px-4 rounded-pill">Aceptar</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="3" class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox fs-1 d-block mb-2 opacity-50"></i>
+                                No tiene beneficiarios registrados.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
