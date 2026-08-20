@@ -1,79 +1,71 @@
-﻿@model ArtemisBankingPro.Core.Domain.Entities.CuentaAhorro
+﻿@model ArtemisBankingPro.Core.Application.CreditCards.GetCreditCardById.CreditCardDetailDto
 
 @{
-    ViewData["Title"] = "Detalles de Cuenta";
+    ViewData["Title"] = "Detalles de la Tarjeta de Crédito";
     Layout = "_Layout";
 }
 
 <div class="container-fluid py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h1 class="h3 fw-bold text-dark">Transacciones de Cuenta</h1>
-            <p class="text-muted mb-0">Historial de movimientos registrados para la cuenta.</p>
+            <h1 class="h3 fw-bold text-dark">Consumos de la Tarjeta</h1>
+            <p class="text-muted mb-0">Historial de consumos registrados para la tarjeta de crédito.</p>
         </div>
         <a asp-action="Index" class="btn btn-outline-secondary px-4 rounded-3 fw-semibold">
             <i class="bi bi-arrow-left me-1"></i> Volver atrás
         </a>
     </div>
 
-    <!-- Info General -->
+    <!-- Info General de la Tarjeta -->
     <div class="card border-0 shadow-sm rounded-4 mb-4 p-4 bg-white">
         <div class="row g-3">
             <div class="col-md-3">
-                <small class="text-muted text-uppercase fw-semibold">No. Cuenta</small>
-                <h5 class="fw-bold text-dark mb-0 font-monospace">@Model.NumeroCuenta</h5>
+                <small class="text-muted text-uppercase fw-semibold">No. Tarjeta</small>
+                <h5 class="fw-bold text-dark mb-0 font-monospace">**** **** **** @Model.LastFourDigits</h5>
             </div>
             <div class="col-md-3">
                 <small class="text-muted text-uppercase fw-semibold">Cliente</small>
-                <h5 class="fw-bold text-dark mb-0">@(Model.Cliente?.Nombre) @(Model.Cliente?.Apellido)</h5>
+                <h5 class="fw-bold text-dark mb-0">@Model.ClientFullName</h5>
             </div>
             <div class="col-md-2">
-                <small class="text-muted text-uppercase fw-semibold">Balance Disponible</small>
-                <h5 class="fw-bold text-success mb-0">RD$@Model.Balance.ToString("N2")</h5>
+                <small class="text-muted text-uppercase fw-semibold">Deuda Actual</small>
+                <h5 class="fw-bold text-danger mb-0">RD$@Model.CurrentDebt.ToString("N2")</h5>
             </div>
             <div class="col-md-2">
-                <small class="text-muted text-uppercase fw-semibold">Tipo</small>
-                <h5 class="fw-bold text-dark mb-0">@Model.TipoCuenta</h5>
+                <small class="text-muted text-uppercase fw-semibold">Crédito Disponible</small>
+                <h5 class="fw-bold text-success mb-0">RD$@Model.AvailableCredit.ToString("N2")</h5>
             </div>
             <div class="col-md-2">
                 <small class="text-muted text-uppercase fw-semibold">Estado</small>
-                <h5 class="fw-bold text-dark mb-0">@Model.Estado</h5>
+                <h5 class="fw-bold text-dark mb-0">@Model.Status</h5>
             </div>
         </div>
     </div>
 
-    <!-- Listado de Transacciones -->
-    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+    <!-- Listado de Consumos -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light text-uppercase fs-7">
                     <tr>
                         <th class="ps-4">Fecha</th>
                         <th>Monto</th>
-                        <th>Tipo</th>
-                        <th>Destino</th>
-                        <th>Origen</th>
+                        <th>Comercio</th>
                         <th class="text-end pe-4">Estado</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @if (Model.Transacciones != null && Model.Transacciones.Any())
+                    @if (Model.Consumptions != null && Model.Consumptions.Any())
                     {
-                        foreach (var tx in Model.Transacciones.OrderByDescending(t => t.Fecha))
+                        foreach (var consumo in Model.Consumptions.OrderByDescending(t => t.Date))
                         {
                             <tr>
-                                <td class="ps-4 fw-semibold text-dark">@tx.Fecha.ToString("dd/MM/yyyy HH:mm")</td>
-                                <td class="fw-bold">RD$@tx.Monto.ToString("N2")</td>
-                                <td>
-                                    <span class="badge bg-@(tx.Tipo == ArtemisBankingPro.Core.Domain.Enums.TipoTransaccion.Credito ? "success" : "danger") px-3 py-2 rounded-pill">
-                                        @tx.Tipo
-                                    </span>
-                                </td>
-                                <td>@tx.Destino</td>
-                                <td>@tx.Origen</td>
+                                <td class="ps-4 fw-semibold text-dark">@consumo.Date.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td class="fw-bold text-danger">RD$@consumo.Amount.ToString("N2")</td>
+                                <td class="fw-semibold">@consumo.CommerceName</td>
                                 <td class="text-end pe-4">
-                                    <span class="badge bg-@(tx.Estado == ArtemisBankingPro.Core.Domain.Enums.EstadoTransaccion.Aprobada ? "success" : "secondary") px-3 py-2 rounded-pill">
-                                        @tx.Estado
+                                    <span class="badge bg-@(consumo.Status == "Aprobada" ? "success" : "secondary") px-3 py-2 rounded-pill">
+                                        @consumo.Status
                                     </span>
                                 </td>
                             </tr>
@@ -82,7 +74,7 @@
                     else
                     {
                         <tr>
-                            <td colspan="6" class="text-center py-4 text-muted">No se registran transacciones para esta cuenta.</td>
+                            <td colspan="4" class="text-center py-4 text-muted">No se registran consumos para esta tarjeta.</td>
                         </tr>
                     }
                 </tbody>

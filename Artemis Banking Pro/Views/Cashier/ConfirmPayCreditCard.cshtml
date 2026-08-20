@@ -1,0 +1,54 @@
+﻿@{
+    ViewData["Title"] = "Confirmar Pago a Tarjeta";
+    Layout = "_Layout";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white text-center">
+                <h2 class="h4 fw-bold text-dark mb-3">Confirmación de Pago a Tarjeta</h2>
+                <p class="fs-6 text-muted mb-4">¿Está seguro que desea realizar este pago?</p>
+
+                <ul class="list-group list-group-flush text-start mb-4">
+                    <li class="list-group-item d-flex justify-content-between py-3">
+                        <span class="fw-semibold text-muted">Titular cuenta origen:</span>
+                        <span class="fw-bold text-dark">@ViewBag.TitularCuenta</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between py-3">
+                        <span class="fw-semibold text-muted">Número cuenta origen:</span>
+                        <span class="fw-bold text-dark font-monospace">@ViewBag.SourceAccountNumber</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between py-3">
+                        <span class="fw-semibold text-muted">Titular de la tarjeta:</span>
+                        <span class="fw-bold text-dark">@ViewBag.TitularTarjeta</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between py-3">
+                        <span class="fw-semibold text-muted">Tarjeta destino:</span>
+                        <span class="fw-bold text-dark font-monospace">****-****-****-@ViewBag.CardLastFour</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between py-3">
+                        <span class="fw-semibold text-muted">Monto ingresado:</span>
+                        <span class="fw-bold text-dark">RD$@(((decimal)ViewBag.MontoIngresado).ToString("N2"))</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between py-3 bg-light rounded-3">
+                        <span class="fw-bold text-success">Monto efectivo a pagar:</span>
+                        <span class="fw-bold text-success fs-5">RD$@(((decimal)ViewBag.MontoEfectivo).ToString("N2"))</span>
+                    </li>
+                </ul>
+
+                <form asp-action="ExecutePayCreditCard" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="sourceAccountNumber" value="@ViewBag.SourceAccountNumber" />
+                    <input type="hidden" name="cardNumber" value="@ViewBag.CardNumberFull" />
+                    <input type="hidden" name="monto" value="@ViewBag.MontoIngresado" />
+
+                    <div class="d-flex justify-content-center gap-3">
+                        <a asp-action="PayCreditCard" class="btn btn-outline-secondary rounded-3 px-4 fw-semibold">Cancelar</a>
+                        <button type="submit" class="btn btn-success rounded-3 px-4 fw-bold shadow-sm">Confirmar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

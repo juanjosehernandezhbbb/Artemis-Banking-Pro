@@ -21,5 +21,19 @@ namespace ArtemisBankingPro.Core.Application.Common.Interfaces
         Task SendCashAdvanceEmailAsync(string toEmail, string clientName, decimal amount, decimal interest, decimal totalCharged, string accountLastFour, DateTime transactionDate);
 
         Task SendTransferBetweenAccountsEmailAsync(string toEmail, string clientName, decimal amount, string originLastFour, string targetLastFour, DateTime transactionDate);
+
+        Task SendDepositEmailAsync(string toEmail, string clientName, decimal amount, string accountLastFour, DateTime transactionDate);
+
+        Task SendWithdrawalEmailAsync(string toEmail, string clientName, decimal amount, string accountLastFour, DateTime transactionDate);
+
+        Task SendCreditCardPaymentEmailAsync(string toEmail, string clientName, decimal amount, string accountLastFour, string cardLastFour, DateTime transactionDate);
+        Task SendAccountDebitedForCardPaymentEmailAsync(string toEmail, string clientName, decimal amount, string accountLastFour, string cardLastFour, DateTime transactionDate);
+
+        Task SendLoanPaymentNotificationEmailAsync(string toEmail, string clientName, decimal amount, string loanNumber, string accountLastFour, DateTime transactionDate);
+        Task SendAccountDebitedForLoanPaymentEmailAsync(string toEmail, string clientName, decimal amount, string loanNumber, string accountLastFour, DateTime transactionDate);
+
+        Task SendThirdPartyTransferSourceEmailAsync(string toEmail, string clientName, decimal amount, string sourceLastFour, string targetLastFour, DateTime transactionDate);
+        Task SendThirdPartyTransferDestinationEmailAsync(string toEmail, string clientName, decimal amount, string sourceLastFour, string targetLastFour, DateTime transactionDate);
     }
 }
+

@@ -66,17 +66,17 @@ namespace ArtemisBankingPro.Infrastructure.Services
         }
 
         // =======================================================
-        // MÉTODOS REALES DE ENVÍO DE CORREO
+        // MÉTODOS DE ENVÍO DE CORREO ESPECÍFICOS
         // =======================================================
 
         public async Task SendPasswordResetEmailAsync(string toEmail, string userName, string token)
         {
-            // Buscamos el userId correspondiente en la base de datos
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == toEmail);
             string userId = user?.Id ?? string.Empty;
 
-            // Enlace con el puerto 7179 y los parámetros requeridos por el AccountController
-            string resetLink = $"https://localhost:7179/Account/ResetPassword?userId={userId}&token={System.Net.WebUtility.UrlEncode(token)}";
+            // Lee la URL base de forma dinámica desde el appsettings.json
+            var baseUrl = _configuration["AppBaseUrl"] ?? "https://localhost:7179";
+            string resetLink = $"{baseUrl}/Account/ResetPassword?userId={userId}&token={System.Net.WebUtility.UrlEncode(token)}";
 
             string subject = "Restablecer contraseña - Artemis Banking Pro";
             string body = $"Hola <b>{userName}</b>,<br><br>" +
@@ -93,7 +93,9 @@ namespace ArtemisBankingPro.Infrastructure.Services
 
         public async Task SendActivationEmailAsync(string toEmail, string userName, string token)
         {
-            string activationLink = $"https://localhost:7179/Account/ConfirmAccount?token={System.Net.WebUtility.UrlEncode(token)}";
+            // Lee la URL base de forma dinámica desde el appsettings.json
+            var baseUrl = _configuration["AppBaseUrl"] ?? "https://localhost:7179";
+            string activationLink = $"{baseUrl}/Account/ConfirmAccount?token={System.Net.WebUtility.UrlEncode(token)}";
 
             string subject = "Activación de cuenta - Artemis Banking Pro";
             string body = $"Hola <b>{userName}</b>,<br><br>" +
@@ -179,6 +181,102 @@ namespace ArtemisBankingPro.Infrastructure.Services
                           $"<b>Cuenta origen terminada en:</b> {originLastFour}<br>" +
                           $"<b>Cuenta destino terminada en:</b> {targetLastFour}<br>" +
                           $"<b>Monto transferido:</b> RD${amount:N2}<br>" +
+                          $"<b>Fecha y hora:</b> {transactionDate:dd/MM/yyyy HH:mm:ss}<br><br>" +
+                          $"Si usted no reconoce esta operación, comuníquese con la entidad bancaria.";
+
+            await SendEmailAsync(toEmail, subject, body);
+        }
+
+        public async Task SendDepositEmailAsync(string toEmail, string clientName, decimal amount, string accountLastFour, DateTime transactionDate)
+        {
+            string subject = $"Depósito realizado a su cuenta [{accountLastFour}]";
+            string body = $"Hola <b>{clientName}</b>,<br><br>" +
+                          $"Se ha realizado un depósito a su cuenta terminada en {accountLastFour}.<br><br>" +
+                          $"<b>Monto depositado:</b> RD${amount:N2}<br>" +
+                          $"<b>Fecha y hora:</b> {transactionDate:dd/MM/yyyy HH:mm:ss}<br><br>" +
+                          $"Si usted no reconoce esta operación, comuníquese con la entidad bancaria.";
+
+            await SendEmailAsync(toEmail, subject, body);
+        }
+
+        public async Task SendWithdrawalEmailAsync(string toEmail, string clientName, decimal amount, string accountLastFour, DateTime transactionDate)
+        {
+            string subject = $"Retiro realizado desde su cuenta [{accountLastFour}]";
+            string body = $"Hola <b>{clientName}</b>,<br><br>" +
+                          $"Se ha realizado un retiro desde su cuenta terminada en {accountLastFour}.<br><br>" +
+                          $"<b>Monto retirado:</b> RD${amount:N2}<br>" +
+                          $"<b>Fecha y hora:</b> {transactionDate:dd/MM/yyyy HH:mm:ss}<br><br>" +
+                          $"Si usted no reconoce esta operación, comuníquese con la entidad bancaria.";
+
+            await SendEmailAsync(toEmail, subject, body);
+        }
+
+        public async Task SendCreditCardPaymentEmailAsync(string toEmail, string clientName, decimal amount, string accountLastFour, string cardLastFour, DateTime transactionDate)
+        {
+            string subject = $"Pago realizado a la tarjeta [{cardLastFour}]";
+            string body = $"Hola <b>{clientName}</b>,<br><br>" +
+                          $"Se ha realizado un pago a su tarjeta de crédito terminada en {cardLastFour}.<br><br>" +
+                          $"<b>Monto pagado:</b> RD${amount:N2}<br>" +
+                          $"<b>Cuenta origen terminada en:</b> {accountLastFour}<br>" +
+                          $"<b>Fecha y hora:</b> {transactionDate:dd/MM/yyyy HH:mm:ss}<br><br>" +
+                          $"Si usted no reconoce esta operación, comuníquese con la entidad bancaria.";
+
+            await SendEmailAsync(toEmail, subject, body);
+        }
+
+        public async Task SendAccountDebitedForCardPaymentEmailAsync(string toEmail, string clientName, decimal amount, string accountLastFour, string cardLastFour, DateTime transactionDate)
+        {
+            string subject = $"Débito en su cuenta [{accountLastFour}] por pago de tarjeta";
+            string body = $"Hola <b>{clientName}</b>,<br><br>" +
+                          $"Se ha debitado dinero de su cuenta de ahorro terminada en {accountLastFour} para realizar un pago a la tarjeta terminada en {cardLastFour}.<br><br>" +
+                          $"<b>Monto debitado:</b> RD${amount:N2}<br>" +
+                          $"<b>Fecha y hora:</b> {transactionDate:dd/MM/yyyy HH:mm:ss}<br><br>" +
+                          $"Si usted no autorizó esta operación, comuníquese con la entidad bancaria.";
+
+            await SendEmailAsync(toEmail, subject, body);
+        }
+
+        public async Task SendLoanPaymentNotificationEmailAsync(string toEmail, string clientName, decimal amount, string loanNumber, string accountLastFour, DateTime transactionDate)
+        {
+            string subject = $"Pago realizado al préstamo [{loanNumber}]";
+            string body = $"Hola <b>{clientName}</b>,<br><br>" +
+                          $"Se ha realizado un pago a su préstamo {loanNumber}.<br><br>" +
+                          $"<b>Monto pagado:</b> RD${amount:N2}<br>" +
+                          $"<b>Cuenta origen terminada en:</b> {accountLastFour}<br>" +
+                          $"<b>Fecha y hora:</b> {transactionDate:dd/MM/yyyy HH:mm:ss}<br><br>" +
+                          $"Si usted no reconoce esta operación, comuníquese con la entidad bancaria.";
+
+            await SendEmailAsync(toEmail, subject, body);
+        }
+
+        public async Task SendAccountDebitedForLoanPaymentEmailAsync(string toEmail, string clientName, decimal amount, string loanNumber, string accountLastFour, DateTime transactionDate)
+        {
+            string subject = $"Débito en su cuenta [{accountLastFour}] por pago de préstamo";
+            string body = $"Hola <b>{clientName}</b>,<br><br>" +
+                          $"Se ha debitado dinero de su cuenta de ahorro terminada en {accountLastFour} para realizar un pago al préstamo {loanNumber}.<br><br>" +
+                          $"<b>Monto debitado:</b> RD${amount:N2}<br>" +
+                          $"<b>Fecha y hora:</b> {transactionDate:dd/MM/yyyy HH:mm:ss}<br><br>" +
+                          $"Si usted no autorizó esta operación, comuníquese con la entidad bancaria.";
+
+            await SendEmailAsync(toEmail, subject, body);
+        }
+
+        public async Task SendThirdPartyTransferSourceEmailAsync(string toEmail, string clientName, decimal amount, string sourceLastFour, string targetLastFour, DateTime transactionDate)
+        {
+            string subject = $"Transacción realizada a la cuenta [{targetLastFour}]";
+            string body = $"Hola <b>{clientName}</b>,<br><br>" +
+                          $"Se ha realizado una transferencia de RD${amount:N2} desde su cuenta terminada en {sourceLastFour} hacia la cuenta terminada en {targetLastFour}.<br><br>" +
+                          $"<b>Fecha y hora:</b> {transactionDate:dd/MM/yyyy HH:mm:ss}<br><br>" +
+                          $"Si usted no reconoce esta operación, comuníquese con la entidad bancaria.";
+
+            await SendEmailAsync(toEmail, subject, body);
+        }
+
+        public async Task SendThirdPartyTransferDestinationEmailAsync(string toEmail, string clientName, decimal amount, string sourceLastFour, string targetLastFour, DateTime transactionDate)
+        {
+            string subject = $"Transacción enviada desde la cuenta [{sourceLastFour}]";
+            string body = $"Hola <b>{clientName}</b>,<br><br>" +
+                          $"Ha recibido una transferencia por RD${amount:N2} en su cuenta terminada en {targetLastFour} desde la cuenta terminada en {sourceLastFour}.<br><br>" +
                           $"<b>Fecha y hora:</b> {transactionDate:dd/MM/yyyy HH:mm:ss}<br><br>" +
                           $"Si usted no reconoce esta operación, comuníquese con la entidad bancaria.";
 

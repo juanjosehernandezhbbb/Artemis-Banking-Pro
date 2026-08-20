@@ -1,0 +1,50 @@
+﻿@{
+    ViewData["Title"] = "Confirmar Transacción";
+    Layout = "_Layout";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white text-center">
+                <h2 class="h4 fw-bold text-dark mb-3">Confirmación de Transacción</h2>
+                <p class="fs-6 text-muted mb-4">¿Está seguro de que desea realizar esta transacción?</p>
+
+                <ul class="list-group list-group-flush text-start mb-4">
+                    <li class="list-group-item d-flex justify-content-between py-3">
+                        <span class="fw-semibold text-muted">Titular cuenta origen:</span>
+                        <span class="fw-bold text-dark">@ViewBag.TitularOrigen</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between py-3">
+                        <span class="fw-semibold text-muted">Número cuenta origen:</span>
+                        <span class="fw-bold text-dark font-monospace">@ViewBag.SourceAccountNumber</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between py-3">
+                        <span class="fw-semibold text-muted">Titular cuenta destino:</span>
+                        <span class="fw-bold text-dark">@ViewBag.TitularDestino</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between py-3">
+                        <span class="fw-semibold text-muted">Número cuenta destino:</span>
+                        <span class="fw-bold text-dark font-monospace">@ViewBag.TargetAccountNumber</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between py-3 bg-light rounded-3">
+                        <span class="fw-bold text-dark">Monto de la transacción:</span>
+                        <span class="fw-bold text-success fs-5">RD$@(((decimal)ViewBag.Monto).ToString("N2"))</span>
+                    </li>
+                </ul>
+
+                <form asp-action="ExecuteThirdPartyTransfer" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="sourceAccountNumber" value="@ViewBag.SourceAccountNumber" />
+                    <input type="hidden" name="targetAccountNumber" value="@ViewBag.TargetAccountNumber" />
+                    <input type="hidden" name="monto" value="@ViewBag.Monto" />
+
+                    <div class="d-flex justify-content-center gap-3">
+                        <a asp-action="ThirdPartyTransfer" class="btn btn-outline-secondary rounded-3 px-4 fw-semibold">Cancelar</a>
+                        <button type="submit" class="btn btn-success rounded-3 px-4 fw-bold shadow-sm">Confirmar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

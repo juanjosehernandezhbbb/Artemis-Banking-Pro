@@ -1,0 +1,49 @@
+﻿@{
+    ViewData["Title"] = "Pago a Préstamo";
+    Layout = "_Layout";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+                <h2 class="h4 fw-bold text-dark mb-3">Pago a Préstamo</h2>
+                <p class="text-muted mb-4">Alique un abono o pago a cuotas pendientes de un préstamo activo.</p>
+
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger rounded-3">
+                        <div asp-validation-summary="All" class="mb-0 text-danger small"></div>
+                    </div>
+                }
+
+                <form asp-action="PayLoan" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label for="sourceAccountNumber" class="form-label fw-semibold">Número de cuenta origen</label>
+                        <input type="text" name="sourceAccountNumber" id="sourceAccountNumber" class="form-control rounded-3" placeholder="Ej. 12345678" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="loanNumber" class="form-label fw-semibold">Número de préstamo (9 dígitos)</label>
+                        <input type="text" name="loanNumber" id="loanNumber" maxlength="9" class="form-control rounded-3" placeholder="Ej. 123456789" required />
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="monto" class="form-label fw-semibold">Monto a pagar</label>
+                        <div class="input-group">
+                            <span class="input-group-text">RD$</span>
+                            <input type="number" step="0.01" min="0.01" name="monto" id="monto" class="form-control rounded-end-3" placeholder="0.00" required />
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a asp-action="Index" class="btn btn-outline-secondary rounded-3 px-4 fw-semibold">Cancelar</a>
+                        <button type="submit" class="btn btn-info rounded-3 px-4 fw-bold shadow-sm text-white">Realizar pago</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

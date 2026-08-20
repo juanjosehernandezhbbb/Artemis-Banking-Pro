@@ -16,17 +16,27 @@
         .nav-pills .nav-link:hover:not(.active) {
             background-color: #e9ecef !important;
         }
+
+        body {
+            background-color: #f8f9fa;
+        }
     </style>
 </head>
-<body class="bg-light d-flex flex-column min-vh-100">
+<body class="d-flex flex-column min-vh-100">
 
     @if (User.Identity != null && User.Identity.IsAuthenticated)
     {
         <header>
             <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom shadow-sm mb-4 py-3">
                 <div class="container-fluid px-4">
-                    <!-- El logo redirige al Admin Home si es administrador, o al Home general -->
-                    <a class="navbar-brand fw-bold text-primary fs-4" asp-area="" asp-controller="@(User.IsInRole("Administrador") ? "Admin" : "Home")" asp-action="Index">
+                    <!-- Redirección inteligente según el rol -->
+                    @{
+                        string homeController = "Home";
+                        if (User.IsInRole("Administrador")) homeController = "Admin";
+                        else if (User.IsInRole("Cajero")) homeController = "Cashier";
+                        else if (User.IsInRole("Cliente")) homeController = "Client";
+                    }
+                    <a class="navbar-brand fw-bold text-primary fs-4" asp-area="" asp-controller="@homeController" asp-action="Index">
                         <i class="bi bi-bank2 me-2"></i> Artemis Banking
                     </a>
 
@@ -37,7 +47,7 @@
                     <div class="navbar-collapse collapse d-sm-inline-flex justify-content-end">
                         <ul class="navbar-nav align-items-center gap-3">
                             <li class="nav-item text-secondary fw-semibold">
-                                <i class="bi bi-person-circle me-1"></i> @User.Identity.Name
+                                <i class="bi bi-person-circle me-1 text-primary"></i> @User.Identity.Name
                             </li>
                             <li class="nav-item">
                                 <a class="btn btn-outline-danger fw-bold px-4 rounded-pill shadow-sm" asp-controller="Account" asp-action="Logout">
@@ -49,7 +59,7 @@
                 </div>
             </nav>
 
-            <!-- Menú de navegación secundario persistente para Administradores -->
+            <!-- 1. Menú para Administradores -->
             @if (User.IsInRole("Administrador"))
             {
                 string currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
@@ -78,7 +88,38 @@
                 </div>
             }
 
-            <!-- NUEVO: Menú de navegación secundario persistente para Clientes -->
+            <!-- 2. Menú para Cajeros -->
+            @if (User.IsInRole("Cajero"))
+            {
+                string currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+
+                <div class="container-fluid px-4 mb-4">
+                    <div class="card shadow-sm border-0 rounded-4 bg-white p-2">
+                        <nav class="nav nav-pills flex-column flex-sm-row justify-content-around gap-2">
+                            <a class="flex-sm-fill text-sm-center nav-link @(currentAction == "Index" ? "active fw-bold shadow-sm" : "text-dark fw-semibold bg-light") rounded-3 py-2" href="@Url.Action("Index", "Cashier")">
+                                <i class="bi bi-house-door-fill me-1"></i> Home Cajero
+                            </a>
+                            <a class="flex-sm-fill text-sm-center nav-link @(currentAction == "Deposit" ? "active fw-bold shadow-sm" : "text-dark fw-semibold bg-light") rounded-3 py-2" href="@Url.Action("Deposit", "Cashier")">
+                                <i class="bi bi-arrow-down-circle-fill me-1 text-success"></i> Depósito
+                            </a>
+                            <a class="flex-sm-fill text-sm-center nav-link @(currentAction == "Withdrawal" ? "active fw-bold shadow-sm" : "text-dark fw-semibold bg-light") rounded-3 py-2" href="@Url.Action("Withdrawal", "Cashier")">
+                                <i class="bi bi-arrow-up-circle-fill me-1 text-warning"></i> Retiro
+                            </a>
+                            <a class="flex-sm-fill text-sm-center nav-link @(currentAction == "PayCreditCard" ? "active fw-bold shadow-sm" : "text-dark fw-semibold bg-light") rounded-3 py-2" href="@Url.Action("PayCreditCard", "Cashier")">
+                                <i class="bi bi-credit-card-fill me-1 text-primary"></i> Pago Tarjeta
+                            </a>
+                            <a class="flex-sm-fill text-sm-center nav-link @(currentAction == "PayLoan" ? "active fw-bold shadow-sm" : "text-dark fw-semibold bg-light") rounded-3 py-2" href="@Url.Action("PayLoan", "Cashier")">
+                                <i class="bi bi-cash-stack me-1 text-info"></i> Pago Préstamo
+                            </a>
+                            <a class="flex-sm-fill text-sm-center nav-link @(currentAction == "ThirdPartyTransfer" ? "active fw-bold shadow-sm" : "text-dark fw-semibold bg-light") rounded-3 py-2" href="@Url.Action("ThirdPartyTransfer", "Cashier")">
+                                <i class="bi bi-arrow-left-right me-1 text-secondary"></i> Terceros
+                            </a>
+                        </nav>
+                    </div>
+                </div>
+            }
+
+            <!-- 3. Menú para Clientes -->
             @if (User.IsInRole("Cliente"))
             {
                 string currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
@@ -124,13 +165,36 @@
         </header>
     }
 
+    <!-- Alertas Globales automáticas para TempData (Success, Error, Warning) -->
+    <div class="container-fluid px-4">
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show rounded-4 shadow-sm mb-4" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i> @TempData["Success"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show rounded-4 shadow-sm mb-4" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @if (TempData["Warning"] != null)
+        {
+            <div class="alert alert-warning alert-dismissible fade show rounded-4 shadow-sm mb-4" role="alert">
+                <i class="bi bi-exclamation-circle-fill me-2"></i> @TempData["Warning"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+    </div>
+
     <div class="container-fluid px-4 flex-grow-1 pb-5">
         <main role="main">
             @RenderBody()
         </main>
     </div>
-
-    <!-- El footer fue eliminado para un diseño más limpio -->
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

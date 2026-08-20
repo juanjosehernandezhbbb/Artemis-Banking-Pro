@@ -1,0 +1,151 @@
+﻿@model ArtemisBankingPro.WebApp.ViewModels.CashierDashboardViewModel
+
+@{
+    ViewData["Title"] = "Panel de Cajero";
+    Layout = "_Layout";
+}
+
+<div class="container-fluid py-4">
+    <!-- Encabezado de Bienvenida -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">Panel de Control - Cajero</h2>
+            <p class="text-muted mb-0">Resumen y operaciones realizadas durante el día de hoy.</p>
+        </div>
+    </div>
+
+    <!-- Indicadores Operativos (Tarjetas de Métricas) -->
+    <div class="row g-4 mb-5">
+        <!-- Transacciones Realizadas Hoy -->
+        <div class="col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white border-start border-primary border-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small fw-bold text-uppercase">Transacciones Hoy</span>
+                        <h2 class="fw-bold text-dark mt-2 mb-0">@Model.TransaccionesHoy</h2>
+                    </div>
+                    <div class="bg-primary bg-opacity-10 rounded-circle p-3 text-primary">
+                        <i class="bi bi-receipt fs-3"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagos Realizados Hoy -->
+        <div class="col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white border-start border-success border-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small fw-bold text-uppercase">Pagos Realizados</span>
+                        <h2 class="fw-bold text-dark mt-2 mb-0">@Model.PagosHoy</h2>
+                    </div>
+                    <div class="bg-success bg-opacity-10 rounded-circle p-3 text-success">
+                        <i class="bi bi-credit-card-2-front fs-3"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Depósitos Realizados Hoy -->
+        <div class="col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white border-start border-info border-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small fw-bold text-uppercase">Depósitos Hoy</span>
+                        <h2 class="fw-bold text-dark mt-2 mb-0">@Model.DepositosHoy</h2>
+                    </div>
+                    <div class="bg-info bg-opacity-10 rounded-circle p-3 text-info">
+                        <i class="bi bi-arrow-down-circle fs-3"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Retiros Realizados Hoy -->
+        <div class="col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white border-start border-warning border-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small fw-bold text-uppercase">Retiros Hoy</span>
+                        <h2 class="fw-bold text-dark mt-2 mb-0">@Model.RetirosHoy</h2>
+                    </div>
+                    <div class="bg-warning bg-opacity-10 rounded-circle p-3 text-warning">
+                        <i class="bi bi-arrow-up-circle fs-3"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Menú de Operaciones del Cajero -->
+    <div class="row g-4">
+        <div class="col-12">
+            <h4 class="fw-bold text-secondary mb-3">Operaciones Disponibles</h4>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100 text-center">
+                <div class="card-body">
+                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex p-3 mb-3">
+                        <i class="bi bi-box-arrow-in-down fs-2"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark">Depósito</h5>
+                    <p class="text-muted small">Realizar depósitos en efectivo o cheques a cuentas de ahorro.</p>
+                    <a asp-controller="Cashier" asp-action="Deposit" class="btn btn-outline-primary rounded-pill px-4 fw-semibold w-100">Acceder</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100 text-center">
+                <div class="card-body">
+                    <div class="bg-warning bg-opacity-10 text-warning rounded-circle d-inline-flex p-3 mb-3">
+                        <i class="bi bi-box-arrow-up fs-2"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark">Retiro</h5>
+                    <p class="text-muted small">Efectuar retiros de fondos desde cuentas de ahorro activas.</p>
+                    <a asp-controller="Cashier" asp-action="Withdrawal" class="btn btn-outline-warning rounded-pill px-4 fw-semibold w-100 text-dark">Acceder</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100 text-center">
+                <div class="card-body">
+                    <div class="bg-success bg-opacity-10 text-success rounded-circle d-inline-flex p-3 mb-3">
+                        <i class="bi bi-credit-card fs-2"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark">Pago a Tarjeta</h5>
+                    <p class="text-muted small">Registrar pagos directos a tarjetas de crédito del sistema.</p>
+                    <a asp-controller="Cashier" asp-action="PayCreditCard" class="btn btn-outline-success rounded-pill px-4 fw-semibold w-100">Acceder</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100 text-center">
+                <div class="card-body">
+                    <div class="bg-info bg-opacity-10 text-info rounded-circle d-inline-flex p-3 mb-3">
+                        <i class="bi bi-file-earmark-text fs-2"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark">Pago a Préstamo</h5>
+                    <p class="text-muted small">Aplicar pagos a cuotas pendientes de préstamos activos.</p>
+                    <a asp-controller="Cashier" asp-action="PayLoan" class="btn btn-outline-info rounded-pill px-4 fw-semibold w-100">Acceder</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100 text-center">
+                <div class="card-body">
+                    <div class="bg-secondary bg-opacity-10 text-secondary rounded-circle d-inline-flex p-3 mb-3">
+                        <i class="bi bi-arrow-left-right fs-2"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark">Cuentas de Terceros</h5>
+                    <p class="text-muted small">Ejecutar transferencias hacia cuentas de ahorro de terceros.</p>
+                    <a asp-controller="Cashier" asp-action="ThirdPartyTransfer" class="btn btn-outline-secondary rounded-pill px-4 fw-semibold w-100">Acceder</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

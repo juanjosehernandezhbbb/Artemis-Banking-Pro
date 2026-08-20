@@ -5,9 +5,7 @@ using ArtemisBankingPro.Core.Domain.Entities;
 using ArtemisBankingPro.Core.Domain.Enums;
 using ArtemisBankingPro.Core.Domain.Interfaces;
 using MediatR;
-using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
-using System.Text;
 
 namespace ArtemisBankingPro.Core.Application.Users.CreateUser
 {
@@ -98,9 +96,8 @@ namespace ArtemisBankingPro.Core.Application.Users.CreateUser
                 await _unitOfWork.SaveChangesAsync();
             }
 
-            var nativeToken = await _identityService.GenerateEmailConfirmationTokenAsync(user);
-            var combinedToken = $"{user.Id}:{nativeToken}";
-            var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(combinedToken));
+
+            var encodedToken = await _identityService.GenerateEmailConfirmationTokenAsync(user);
 
             try
             {
